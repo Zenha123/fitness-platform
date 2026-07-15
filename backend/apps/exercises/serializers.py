@@ -6,5 +6,5 @@ class ExerciseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exercise
-        fields = ['id', 'trainer', 'name', 'category', 'notes', 'created_at']
+        fields = ['id', 'trainer', 'name', 'category', 'notes', 'demo_link', 'created_at']
         read_only_fields = ['id', 'created_at']

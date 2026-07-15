@@ -29,6 +29,7 @@ class Exercise(models.Model):
     name = models.CharField(max_length=255)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     notes = models.TextField(blank=True, null=True)
+    demo_link = models.URLField(max_length=500, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

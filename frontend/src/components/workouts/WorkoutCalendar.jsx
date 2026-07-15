@@ -95,44 +95,42 @@ export default function WorkoutCalendar({ clientId }) {
   }
 
   return (
-    <div className="card">
-      <div className="p-4 border-b border-neutral-100 flex items-center justify-between">
+    <div className="glass-panel tint-sky p-2">
+      <div className="p-4 border-b border-indigo-100/50 flex items-center justify-between">
         <h2 className="text-lg font-bold text-neutral-900">
           {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
         </h2>
         <div className="flex gap-2">
-          <button onClick={prevMonth} className="p-1.5 rounded-md hover:bg-neutral-100 text-neutral-600 transition-colors">
+          <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-white/60 text-neutral-600 transition-colors shadow-sm bg-white/40">
             <ChevronLeftIcon className="w-5 h-5" />
           </button>
-          <button onClick={nextMonth} className="p-1.5 rounded-md hover:bg-neutral-100 text-neutral-600 transition-colors">
+          <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-white/60 text-neutral-600 transition-colors shadow-sm bg-white/40">
             <ChevronRightIcon className="w-5 h-5" />
           </button>
         </div>
       </div>
 
       <div className="p-4">
-        <div className="grid grid-cols-7 gap-px bg-neutral-200 rounded-lg overflow-hidden border border-neutral-200">
+        <div className="grid grid-cols-7 gap-[1px] bg-indigo-100/30 rounded-xl overflow-hidden border border-white/60 shadow-inner backdrop-blur-sm">
           {weekDays.map(day => (
-            <div key={day} className="bg-neutral-50 text-center py-2 text-xs font-bold text-neutral-500 uppercase tracking-wider">
+            <div key={day} className="bg-white/60 text-center py-2.5 text-xs font-bold text-indigo-900/60 uppercase tracking-widest backdrop-blur-md">
               {day}
             </div>
           ))}
 
           {days.map((dayObj, i) => {
             if (!dayObj) {
-              return <div key={i} className="min-h-[100px] bg-neutral-50/50 p-2 relative group transition-colors"></div>;
+              return <div key={i} className="min-h-[100px] bg-white/30 p-2 relative group transition-colors"></div>;
             }
             
-            let bgClass = "bg-white hover:bg-neutral-50";
-            if (isClient) {
-                if (dayObj.status === 'completed') bgClass = "bg-emerald-50 hover:bg-emerald-100";
-                else if (dayObj.status === 'missed') bgClass = "bg-neutral-100 hover:bg-neutral-200";
-            }
+            let bgClass = "bg-white/50 hover:bg-white/80";
+            if (dayObj.status === 'completed') bgClass = "bg-emerald-50/70 hover:bg-emerald-100/80";
+            else if (dayObj.status === 'missed') bgClass = "bg-rose-50/50 hover:bg-rose-100/60";
             
             return (
               <div 
                 key={i} 
-                className={`min-h-[100px] p-2 relative group transition-colors ${bgClass}`}
+                className={`min-h-[100px] p-2 relative group transition-all duration-300 ${bgClass}`}
               >
                 <div className="flex justify-between items-start mb-1">
                   <span className={`text-sm font-semibold w-6 h-6 flex items-center justify-center rounded-full ${

@@ -28,9 +28,9 @@ export default function ReviewCard({ review, isTrainer, onEdit, onDelete }) {
   });
 
   return (
-    <div className="card border border-neutral-200 hover:border-neutral-300 transition-all shadow-sm overflow-hidden">
+    <div className="glass-panel tint-violet border-indigo-150/30 transition-all hover-lift shadow-md overflow-hidden">
       {/* Header */}
-      <div className="bg-neutral-50 border-b border-neutral-100 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white/60 border-b border-indigo-100/50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center font-bold text-sm">
             {review.trainer_name ? review.trainer_name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "TR"}
@@ -73,7 +73,7 @@ export default function ReviewCard({ review, isTrainer, onEdit, onDelete }) {
             <span className="w-1.5 h-3 bg-violet-600 rounded-full"></span>
             Overall Progress Summary
           </h4>
-          <p className="text-neutral-700 leading-relaxed text-sm bg-neutral-50/50 p-4 rounded-xl border border-neutral-100 whitespace-pre-wrap">
+          <p className="text-neutral-700 leading-relaxed text-sm bg-white/70 p-4 rounded-xl border border-indigo-100/30 whitespace-pre-wrap">
             {review.summary}
           </p>
         </div>

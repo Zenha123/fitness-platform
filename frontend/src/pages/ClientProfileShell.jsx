@@ -18,7 +18,7 @@ import ReviewForm from "../components/reviews/ReviewForm";
 export default function ClientProfileShell() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -57,14 +57,13 @@ export default function ClientProfileShell() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
-        <div className="card max-w-md w-full">
-          <div className="card-body text-center py-10">
-            <Alert variant="danger" className="mb-6">{error}</Alert>
-            <Button variant="outline" onClick={() => navigate("/trainer/dashboard")}>
-              Back to Dashboard
-            </Button>
-          </div>
+      <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
+        <div className="absolute top-[-15%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
+        <div className="glass-panel-elevated max-w-md w-full p-8 text-center">
+          <Alert variant="danger" className="mb-6">{error}</Alert>
+          <Button variant="outline" onClick={() => navigate("/trainer/dashboard")}>
+            Back to Dashboard
+          </Button>
         </div>
       </div>
     );
@@ -76,88 +75,96 @@ export default function ClientProfileShell() {
     ? client.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
     : "?";
 
-  // Trainer uses their own unit preference for displaying weight data
+  // Trainer uses their own unit preference for weight representation
   const unit = user?.weight_unit || "kg";
 
   return (
     <TrainerLayout>
-      <div className="mb-4 flex items-center gap-3">
-        <Link to="/trainer/dashboard" className="text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors">
-          Roster
-        </Link>
-        <span className="text-neutral-300">/</span>
-        <span className="text-sm font-semibold text-neutral-900 truncate max-w-[150px]">
-          {client.name}
-        </span>
-      </div>
+      <div className="space-y-6 max-w-7xl mx-auto">
         
-        {/* Client Header Card */}
-        <div className="card mb-6">
-          <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-3xl font-bold flex-shrink-0">
+        {/* Breadcrumb Header */}
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-neutral-400">
+          <Link to="/trainer/dashboard" className="hover:text-primary transition-colors">
+            Roster Database
+          </Link>
+          <span>/</span>
+          <span className="text-neutral-900 truncate max-w-[150px]">
+            {client.name}
+          </span>
+        </div>
+          
+        {/* Client Profile Header card */}
+        <div className="glass-panel-elevated overflow-hidden animate-slide-up relative">
+          <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-indigo-50/20 blur-3xl pointer-events-none" />
+
+          <div className="p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div className="w-20 h-20 rounded-2xl bg-indigo-50 text-primary border border-indigo-100/60 flex items-center justify-center text-2xl font-black shadow-inner flex-shrink-0">
               {initials}
             </div>
             
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900">
+            <div className="flex-1 space-y-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight leading-tight">
                   {client.name}
                 </h1>
-                <span className={`badge ${client.is_active ? 'badge-success' : 'badge-neutral'}`}>
+                <span className={`badge ${client.is_active ? 'badge-success' : 'badge-neutral'} rounded-md font-extrabold text-[10px]`}>
                   {client.is_active ? 'Active' : 'Inactive'}
                 </span>
                 {client.needs_password_change && (
-                  <span className="badge badge-warning">Pending Setup</span>
+                  <span className="badge badge-warning rounded-md font-extrabold text-[10px]">🔑 Pending Setup</span>
                 )}
               </div>
-              <p className="text-neutral-500 flex items-center gap-2 mb-4">
-                <MailIcon className="w-4 h-4" />
-                {client.email}
-              </p>
               
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="bg-neutral-50 px-3 py-2 rounded-lg border border-neutral-200">
-                  <span className="text-neutral-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Joined</span>
-                  <span className="text-neutral-900 font-medium">{new Date(client.created_at).toLocaleDateString()}</span>
-                </div>
-                <div className="bg-neutral-50 px-3 py-2 rounded-lg border border-neutral-200">
-                  <span className="text-neutral-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Last Workout</span>
-                  <span className="text-neutral-900 font-medium">{client.last_completed_workout || "None yet"}</span>
-                </div>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-neutral-500 font-semibold">
+                <span className="flex items-center gap-1.5">
+                  <MailIcon className="w-4 h-4 text-neutral-400" />
+                  {client.email}
+                </span>
+                <span className="hidden sm:inline text-neutral-300">•</span>
+                <span className="flex items-center gap-1.5">
+                  <CalendarIcon className="w-4 h-4 text-neutral-400" />
+                  Joined {new Date(client.created_at).toLocaleDateString()}
+                </span>
               </div>
             </div>
           </div>
           
-          {/* Tabs */}
-          <div className="border-t border-neutral-200 px-6 sm:px-8 flex overflow-x-auto hide-scrollbar">
+          {/* Tabs header row */}
+          <div className="border-t border-neutral-200/80 px-6 sm:px-8 flex overflow-x-auto hide-scrollbar bg-neutral-50/50">
             {[
-              { id: "overview", label: "Overview" },
-              { id: "workouts", label: "Workouts" },
-              { id: "progress", label: "Progress" },
-              { id: "reviews", label: "Reviews" },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-4 font-semibold text-sm whitespace-nowrap border-b-2 transition-colors ${
-                  activeTab === tab.id 
-                    ? "border-violet-600 text-violet-600" 
-                    : "border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+              { id: "overview", label: "Overview", icon: OverviewIcon },
+              { id: "workouts", label: "Workout Schedule", icon: CalendarIcon },
+              { id: "progress", label: "Transformation logs", icon: ProgressIcon },
+              { id: "reviews", label: "Coaching Notes", icon: ReviewIcon },
+            ].map(tab => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`py-4 px-5 font-bold text-sm whitespace-nowrap border-b-2 transition-all flex items-center gap-2 -mb-px ${
+                    isActive 
+                      ? "border-primary text-primary" 
+                      : "border-transparent text-neutral-400 hover:text-neutral-700 hover:border-neutral-200"
+                  }`}
+                >
+                  <tab.icon className={`w-4 h-4 ${isActive ? "text-primary" : "text-neutral-400"}`} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Tab Content */}
-        <div className="mt-6">
+        {/* Tab body content panels */}
+        <div className="animate-slide-up" style={{ animationDelay: "150ms" }}>
           {activeTab === "overview" && (
             <OverviewTab client={client} onUpdate={handleUpdate} />
           )}
           {activeTab === "workouts" && (
-            <WorkoutCalendar clientId={client.id} />
+            <div className="glass-panel p-6">
+              <WorkoutCalendar clientId={client.id} />
+            </div>
           )}
           {activeTab === "progress" && (
             <ProgressTab clientId={client.id} unit={unit} />
@@ -167,6 +174,7 @@ export default function ClientProfileShell() {
           )}
         </div>
 
+      </div>
     </TrainerLayout>
   );
 }
@@ -203,17 +211,17 @@ function OverviewTab({ client, onUpdate }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        <div className="card">
-          <div className="card-header border-b border-neutral-100 p-5 flex items-center justify-between">
-            <h3 className="font-bold text-neutral-900 text-lg">Client Profile Details</h3>
+        <div className="glass-panel">
+          <div className="border-b border-neutral-100 p-5 flex items-center justify-between">
+            <h3 className="font-extrabold text-neutral-900 text-base tracking-tight">Account Configuration</h3>
             {!isEditing && (
               <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                Edit Profile
+                Modify Details
               </Button>
             )}
           </div>
           
-          <div className="card-body p-6">
+          <div className="p-6">
             {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
             {success && <Alert variant="success" className="mb-4">Profile updated successfully.</Alert>}
 
@@ -228,17 +236,19 @@ function OverviewTab({ client, onUpdate }) {
                 />
                 
                 <div className="pt-2 pb-4 border-b border-neutral-100 mb-4">
-                  <label className="flex items-center gap-3 cursor-pointer">
+                  <label className="flex items-start gap-3 cursor-pointer">
                     <input 
                       type="checkbox" 
-                      className="w-5 h-5 rounded border-neutral-300 text-violet-600 focus:ring-violet-600"
+                      className="w-5 h-5 rounded border-neutral-300 text-violet-600 focus:ring-violet-600 mt-0.5"
                       checked={isActive}
                       onChange={(e) => setIsActive(e.target.checked)}
                       disabled={loading}
                     />
                     <div>
-                      <span className="block text-sm font-semibold text-neutral-900">Active Account</span>
-                      <span className="block text-xs text-neutral-500">Uncheck to deactivate client. They will no longer be able to log in.</span>
+                      <span className="block text-sm font-bold text-neutral-900">Active Account Status</span>
+                      <span className="block text-xs text-neutral-400 font-semibold leading-relaxed mt-0.5">
+                        Client will immediately lose platform access if deactivated.
+                      </span>
                     </div>
                   </label>
                 </div>
@@ -258,20 +268,25 @@ function OverviewTab({ client, onUpdate }) {
             ) : (
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1">Full Name</dt>
-                  <dd className="text-neutral-900 font-medium">{client.name}</dd>
+                  <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Full Name</dt>
+                  <dd className="text-neutral-900 font-extrabold">{client.name}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1">Email Address</dt>
-                  <dd className="text-neutral-900 font-medium">{client.email}</dd>
+                  <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Email Address</dt>
+                  <dd className="text-neutral-900 font-extrabold">{client.email}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1">Status</dt>
-                  <dd className="text-neutral-900 font-medium">{client.is_active ? 'Active' : 'Deactivated'}</dd>
+                  <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Roster Status</dt>
+                  <dd className="text-neutral-900 font-extrabold flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${client.is_active ? 'bg-emerald-500' : 'bg-neutral-300'}`} />
+                    {client.is_active ? 'Active Profile' : 'Deactivated'}
+                  </dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1">Onboarding</dt>
-                  <dd className="text-neutral-900 font-medium">{client.needs_password_change ? 'Pending Password Setup' : 'Completed'}</dd>
+                  <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Onboarding Setup</dt>
+                  <dd className="text-neutral-900 font-extrabold">
+                    {client.needs_password_change ? 'Pending temporary reset' : 'Fully Registered'}
+                  </dd>
                 </div>
               </dl>
             )}
@@ -279,15 +294,12 @@ function OverviewTab({ client, onUpdate }) {
         </div>
       </div>
       
-      
       <div className="space-y-6">
-        <div className="card bg-violet-50 border-violet-100">
-          <div className="p-6">
-            <h3 className="font-bold text-violet-900 mb-2">Trainer Tools</h3>
-            <p className="text-sm text-violet-700 leading-relaxed">
-              Use the tabs above to manage workouts, check progress logs, and post feedback review notes for {client.name}.
-            </p>
-          </div>
+        <div className="glass-panel tint-violet border-indigo-100/50 p-6 shadow-sm hover-lift">
+          <h3 className="font-extrabold text-primary mb-2">Coach Notes</h3>
+          <p className="text-xs text-neutral-500 font-bold leading-relaxed">
+            Use the layout tabs above to check calendar attendance records, browse progress check-ins, compare timeline logs, and post feedback review notes for {client.name}.
+          </p>
         </div>
       </div>
     </div>
@@ -353,25 +365,25 @@ function ProgressTab({ clientId, unit }) {
       {error && <Alert variant="danger">{error}</Alert>}
 
       {/* Weight Trend */}
-      <div className="space-y-3">
-        <h3 className="text-lg font-bold text-neutral-900">Weight Tracking</h3>
+      <div className="glass-panel p-6 space-y-4">
+        <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">Bodyweight Progression</h3>
         <WeightChart entries={entries} unit={unit} />
       </div>
 
       {/* Photo Journey */}
-      <div className="space-y-3 border-t border-neutral-200 pt-8">
-        <h3 className="text-lg font-bold text-neutral-900">Photo Journey</h3>
+      <div className="glass-panel p-6 space-y-4">
+        <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">Timeline Photos</h3>
         <PhotoTimeline entries={entries} unit={unit} />
       </div>
 
-      {/* Strength Tracking */}
-      <div className="space-y-3 border-t border-neutral-200 pt-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h3 className="text-lg font-bold text-neutral-900">Strength Progression</h3>
+      {/* Strength Analytics */}
+      <div className="glass-panel p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-4">
+          <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">Strength Benchmarks</h3>
           
           {exercises.length > 0 && (
             <select
-              className="form-input text-xs font-semibold max-w-xs py-1.5"
+              className="form-input text-xs font-bold max-w-xs py-1.5 pr-8 rounded-xl"
               value={selectedExerciseId}
               onChange={(e) => setSelectedExerciseId(e.target.value)}
               disabled={loadingChart}
@@ -386,8 +398,9 @@ function ProgressTab({ clientId, unit }) {
         </div>
 
         {exercises.length === 0 ? (
-          <div className="h-48 flex items-center justify-center border-2 border-dashed border-neutral-200 rounded-xl bg-neutral-50 p-6 text-center text-neutral-400 text-sm font-medium">
-            Client has not logged any strength exercise records yet.
+          <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-neutral-200 rounded-2xl bg-neutral-50/50 p-6 text-center">
+            <p className="text-sm text-neutral-400 font-bold">No exercise records logged yet.</p>
+            <p className="text-xs text-neutral-400 font-medium mt-1">Strength progression charts will show once the client logs workouts.</p>
           </div>
         ) : loadingChart ? (
           <div className="h-64 flex items-center justify-center"><Spinner /></div>
@@ -467,11 +480,11 @@ function ReviewsTab({ clientId, clientName }) {
     <div className="space-y-6">
       {error && <Alert variant="danger">{error}</Alert>}
 
-      <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
+      <div className="flex justify-between items-center glass-panel tint-violet p-5 border-indigo-100/50 shadow-sm">
         <div>
-          <h3 className="font-bold text-neutral-900">Coaching Reviews</h3>
-          <p className="text-xs text-neutral-400">
-            Provide feedback reviews summarizing progress and improvement areas.
+          <h3 className="font-extrabold text-neutral-900 tracking-tight">Coaching Log</h3>
+          <p className="text-xs text-neutral-500 font-bold mt-0.5">
+            Post summaries, check-in updates, and focal correction advice.
           </p>
         </div>
         {!showForm && (
@@ -489,32 +502,35 @@ function ReviewsTab({ clientId, clientName }) {
       </div>
 
       {showForm && (
-        <ReviewForm
-          clientName={clientName}
-          initialData={editingReview}
-          onSubmit={handleSubmitReview}
-          onCancel={() => {
-            setShowForm(false);
-            setEditingReview(null);
-          }}
-        />
+        <div className="glass-panel p-5 animate-slide-up">
+          <ReviewForm
+            clientName={clientName}
+            initialData={editingReview}
+            onSubmit={handleSubmitReview}
+            onCancel={() => {
+              setShowForm(false);
+              setEditingReview(null);
+            }}
+          />
+        </div>
       )}
 
       <div className="space-y-6">
         {reviews.length === 0 ? (
-          <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-neutral-200 rounded-xl bg-neutral-50 p-6 text-center text-neutral-400 text-sm font-medium">
-            <span>No review notes posted yet.</span>
-            <span className="text-xs text-neutral-400 mt-1">Click "Post Review Note" to share feedback with this client.</span>
+          <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-neutral-200 rounded-2xl bg-neutral-50/50 p-6 text-center">
+            <span className="text-sm text-neutral-400 font-bold">No feedback logs yet.</span>
+            <span className="text-xs text-neutral-400 mt-1 font-semibold">Post a review note to share logs with {clientName}.</span>
           </div>
         ) : (
           reviews.map((review) => (
-            <ReviewCard
-              key={review.id}
-              review={review}
-              isTrainer={true}
-              onEdit={handleEditClick}
-              onDelete={handleDeleteReview}
-            />
+            <div key={review.id} className="glass-panel hover-lift overflow-hidden">
+              <ReviewCard
+                review={review}
+                isTrainer={true}
+                onEdit={handleEditClick}
+                onDelete={handleDeleteReview}
+              />
+            </div>
           ))
         )}
       </div>
@@ -522,10 +538,35 @@ function ReviewsTab({ clientId, clientName }) {
   );
 }
 
-function BoltIcon({ className = "" }) {
+/* Nav Tab Icons */
+function OverviewIcon({ className }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path fillRule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.268a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.913-.143z" clipRule="evenodd" />
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+  );
+}
+
+function CalendarIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  );
+}
+
+function ProgressIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+    </svg>
+  );
+}
+
+function ReviewIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
     </svg>
   );
 }
@@ -537,12 +578,3 @@ function MailIcon({ className }) {
     </svg>
   );
 }
-
-function CheckCircleIcon({ className }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
-    </svg>
-  );
-}
-

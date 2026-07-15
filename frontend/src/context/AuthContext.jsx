@@ -32,7 +32,14 @@ export function AuthProvider({ children }) {
 
     if (token && storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        // Fetch fresh profile to get server-computed fields like trainer_name
+        axiosClient.get('/auth/profile/').then(res => {
+          const enriched = { ...parsedUser, ...res.data };
+          localStorage.setItem(USER_KEY, JSON.stringify(enriched));
+          setUser(enriched);
+        }).catch(() => {/* silently ignore if offline */});
       } catch (e) {
         // Fallback: parse from JWT token
         const decoded = parseJwt(token);
@@ -106,6 +113,18 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const refreshProfile = async () => {
+    try {
+      const response = await axiosClient.get('/auth/profile/');
+      const updatedUser = { ...user, ...response.data };
+      localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -113,6 +132,7 @@ export function AuthProvider({ children }) {
     logout,
     changePassword,
     updatePreferences,
+    refreshProfile,
     isAuthenticated: !!user,
   };
 

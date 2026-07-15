@@ -18,10 +18,28 @@ class ClientListSerializer(serializers.ModelSerializer):
         fields = ['id', 'email', 'name', 'is_active', 'needs_password_change', 'created_at', 'last_completed_workout', 'missed_sessions_flag']
 
     def get_last_completed_workout(self, obj):
-        return None # Placeholder
+        from apps.workouts.models import WorkoutLog
+        log = WorkoutLog.objects.filter(client=obj, completed=True).order_by('-date', '-logged_at').first()
+        if log:
+            return log.date.strftime('%Y-%m-%d')
+        return None
 
     def get_missed_sessions_flag(self, obj):
-        return False # Placeholder
+        from apps.workouts.models import WorkoutPlan, WorkoutLog
+        from django.utils import timezone
+        today = timezone.localdate()
+        past_plans = WorkoutPlan.objects.filter(client=obj, scheduled_date__lt=today).order_by('-scheduled_date')[:2]
+        if len(past_plans) < 2:
+            return False
+        for plan in past_plans:
+            has_completed_log = WorkoutLog.objects.filter(
+                client=obj,
+                date=plan.scheduled_date,
+                completed=True
+            ).exists()
+            if has_completed_log:
+                return False
+        return True
 
 
 class ClientCreateSerializer(serializers.Serializer):

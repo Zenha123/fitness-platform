@@ -3,27 +3,28 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../ui/Button";
 
-export default function TrainerLayout({ children }) {
+export default function ClientLayout({ children }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const initials = user?.name
     ? user.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
-    : "T";
+    : "C";
 
   const navLinks = [
-    { name: "Roster", path: "/trainer/dashboard", icon: RosterIcon },
-    { name: "Schedule Workout", path: "/trainer/schedule", icon: ScheduleIcon },
-    { name: "Exercise Library", path: "/trainer/exercises", icon: ExerciseIcon },
+    { name: "Dashboard", path: "/client/dashboard", icon: DashboardIcon },
+    { name: "Progress Log", path: "/client/progress", icon: ProgressIcon },
+    { name: "Strength Analytics", path: "/client/strength", icon: StrengthIcon },
+    { name: "Coach Reviews", path: "/client/reviews", icon: ReviewIcon },
   ];
 
   return (
     <div className="min-h-screen relative overflow-x-hidden pb-12" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
       {/* Background Ambient Blobs */}
-      <div className="absolute top-[-150px] right-[-100px] ambient-blob-1"></div>
-      <div className="absolute top-[30vh] left-[-200px] ambient-blob-2"></div>
-      <div className="absolute bottom-[5vh] right-[5%] ambient-blob-coral"></div>
+      <div className="absolute top-[-150px] left-[-100px] ambient-blob-1"></div>
+      <div className="absolute top-[20vh] right-[-200px] ambient-blob-2"></div>
+      <div className="absolute bottom-[10vh] left-[5%] ambient-blob-coral"></div>
 
       {/* Top Header */}
       <header className="bg-white/40 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40 transition-all duration-300 shadow-sm">
@@ -31,7 +32,7 @@ export default function TrainerLayout({ children }) {
           
           {/* Logo & Desktop Nav */}
           <div className="flex items-center gap-8">
-            <Link to="/trainer/dashboard" className="flex items-center gap-2.5 group">
+            <Link to="/client/dashboard" className="flex items-center gap-2.5 group">
               <div className="w-9 h-9 rounded-xl hero-gradient flex items-center justify-center shadow-md shadow-indigo-500/10 group-hover:scale-105 transition-transform duration-300">
                 <BoltIcon className="w-5 h-5 text-white" />
               </div>
@@ -43,9 +44,7 @@ export default function TrainerLayout({ children }) {
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-1.5">
               {navLinks.map((link) => {
-                const isActive = 
-                  location.pathname === link.path || 
-                  (link.path === "/trainer/dashboard" && location.pathname.startsWith("/trainer/clients"));
+                const isActive = location.pathname === link.path;
                 return (
                   <Link
                     key={link.name}
@@ -71,7 +70,7 @@ export default function TrainerLayout({ children }) {
               <div>
                 <p className="text-sm font-bold text-neutral-900">{user?.name}</p>
                 <p className="text-[10px] uppercase tracking-wider font-extrabold text-neutral-400">
-                  Trainer (Coach)
+                  Client
                 </p>
               </div>
               <div className="avatar avatar-md bg-indigo-50 text-primary border border-indigo-100 font-extrabold shadow-inner">
@@ -120,16 +119,14 @@ export default function TrainerLayout({ children }) {
             </div>
             <div>
               <p className="font-bold text-neutral-800 text-sm">{user?.name}</p>
-              <p className="text-[10px] uppercase font-bold text-neutral-400">Trainer Account</p>
+              <p className="text-[10px] uppercase font-bold text-neutral-400">Client Account</p>
             </div>
           </div>
 
           {/* Drawer Navigation Link List */}
           <nav className="space-y-1">
             {navLinks.map((link) => {
-              const isActive = 
-                location.pathname === link.path || 
-                (link.path === "/trainer/dashboard" && location.pathname.startsWith("/trainer/clients"));
+              const isActive = location.pathname === link.path;
               return (
                 <Link
                   key={link.name}
@@ -180,28 +177,35 @@ function BoltIcon({ className = "" }) {
   );
 }
 
-function RosterIcon({ className }) {
+function DashboardIcon({ className }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
     </svg>
   );
 }
 
-function ScheduleIcon({ className }) {
+function ProgressIcon({ className }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   );
 }
 
-function ExerciseIcon({ className }) {
+function StrengthIcon({ className }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path d="M12 14l9-5-9-5-9 5 9 5z" />
-      <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+    </svg>
+  );
+}
+
+function ReviewIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
     </svg>
   );
 }

@@ -54,7 +54,35 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
         serializer.save(trainer=self.request.user)
 
     def perform_update(self, serializer):
+        from django.utils import timezone
+        from rest_framework.exceptions import ValidationError
+        from .models import WorkoutLog
+        
+        plan = serializer.instance
+        today = timezone.localdate()
+        
+        if plan.scheduled_date < today:
+            raise ValidationError("Past scheduled workouts cannot be modified or deleted.")
+            
+        if WorkoutLog.objects.filter(client=plan.client, date=plan.scheduled_date, completed=True).exists():
+            raise ValidationError("Completed workouts cannot be modified or deleted.")
+            
         serializer.save()
+
+    def perform_destroy(self, instance):
+        from django.utils import timezone
+        from rest_framework.exceptions import ValidationError
+        from .models import WorkoutLog
+        
+        today = timezone.localdate()
+        
+        if instance.scheduled_date < today:
+            raise ValidationError("Past scheduled workouts cannot be modified or deleted.")
+            
+        if WorkoutLog.objects.filter(client=instance.client, date=instance.scheduled_date, completed=True).exists():
+            raise ValidationError("Completed workouts cannot be modified or deleted.")
+            
+        instance.delete()
 
 
 class WorkoutTemplateViewSet(viewsets.ModelViewSet):

@@ -4,10 +4,22 @@ from django.contrib.auth.password_validation import validate_password
 from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
+    trainer_name = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ('id', 'email', 'name', 'role', 'needs_password_change', 'created_at', 'weight_unit')
-        read_only_fields = ('id', 'created_at', 'email', 'role', 'needs_password_change')
+        fields = ('id', 'email', 'name', 'role', 'needs_password_change', 'created_at', 'weight_unit', 'trainer_name')
+        read_only_fields = ('id', 'created_at', 'email', 'role', 'needs_password_change', 'trainer_name')
+
+    def get_trainer_name(self, obj):
+        if obj.role == 'client':
+            from apps.clients.models import TrainerClientLink
+            try:
+                link = TrainerClientLink.objects.select_related('trainer').get(client=obj)
+                return link.trainer.name
+            except TrainerClientLink.DoesNotExist:
+                return None
+        return None
 
 
 class UserPreferenceSerializer(serializers.ModelSerializer):

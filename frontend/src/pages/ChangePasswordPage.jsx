@@ -65,9 +65,11 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-dots opacity-60 pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
+      {/* Ambient Background Blobs */}
+      <div className="absolute top-[-15%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none animate-bloom" />
+      <div className="absolute bottom-[-15%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-violet-500/10 blur-[100px] pointer-events-none animate-bloom" style={{ animationDelay: "200ms" }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[25rem] h-[25rem] rounded-full bg-sky-400/6 blur-[80px] pointer-events-none" />
 
       <div className="w-full max-w-lg relative page-enter">
         {/* Brand header */}

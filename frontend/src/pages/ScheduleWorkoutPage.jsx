@@ -20,16 +20,18 @@ export default function ScheduleWorkoutPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  
+
   const [clients, setClients] = useState([]);
-  
+
   // Plan State
   const [clientId, setClientId] = useState(preselectedClientId || "");
   const [scheduledDate, setScheduledDate] = useState(preselectedDate || new Date().toISOString().split('T')[0]);
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [exercises, setExercises] = useState([]);
-  
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockReason, setLockReason] = useState("");
+
   const [pickerOpen, setPickerOpen] = useState(false);
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState(false);
@@ -41,20 +43,24 @@ export default function ScheduleWorkoutPage() {
   const fetchInitialData = async () => {
     try {
       setLoading(true);
-      // Fetch clients for dropdown
       const clientsData = await clientsApi.getClients();
       setClients(clientsData);
 
       if (planId) {
-        // Edit mode
         const plan = await workoutsApi.getPlan(planId);
         setClientId(plan.client);
         setScheduledDate(plan.scheduled_date);
         setTitle(plan.title);
         setNotes(plan.notes || "");
         setExercises(plan.exercises || []);
+        if (plan.is_completed) {
+          setIsLocked(true);
+          setLockReason("This workout has already been completed by the client and cannot be modified.");
+        } else if (plan.is_past) {
+          setIsLocked(true);
+          setLockReason("This scheduled workout is in the past and cannot be modified.");
+        }
       } else if (!preselectedClientId && clientsData.length > 0) {
-        // Auto-select first client if creating new
         setClientId(clientsData[0].id);
       }
     } catch (err) {
@@ -66,7 +72,6 @@ export default function ScheduleWorkoutPage() {
 
   const handleAddExercise = (exerciseDef) => {
     const newEx = {
-      // Local ID just for React keying before save
       _localId: Math.random().toString(36).substr(2, 9),
       exercise: exerciseDef.id,
       exercise_detail: exerciseDef,
@@ -124,8 +129,7 @@ export default function ScheduleWorkoutPage() {
       } else {
         await workoutsApi.createPlan(payload);
       }
-      
-      // Navigate back to client profile workouts tab
+
       navigate(`/trainer/clients/${clientId}?tab=workouts`);
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to save workout plan.");
@@ -171,7 +175,6 @@ export default function ScheduleWorkoutPage() {
   };
 
   const handleLoadTemplate = (template) => {
-    // Append or replace? Let's ask via confirm, or just replace if empty, append if not.
     const newExercises = template.exercises.map(ex => ({
       _localId: Math.random().toString(36).substr(2, 9),
       exercise: ex.exercise,
@@ -201,191 +204,273 @@ export default function ScheduleWorkoutPage() {
 
   return (
     <TrainerLayout>
-      <div className="flex flex-col md:flex-row gap-6 mb-8 max-w-6xl mx-auto">
-        
-        {/* Left Panel: Settings */}
-        <div className="w-full md:w-80 flex-shrink-0 space-y-6">
-          <div className="card">
-            <div className="p-5 space-y-4">
-              <h2 className="font-bold text-neutral-900 text-lg mb-2">Workout Settings</h2>
-              
-              <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Client</label>
-                <select
-                  className="w-full h-10 px-3 border border-neutral-300 rounded-lg text-sm bg-neutral-50"
-                  value={clientId}
-                  onChange={e => setClientId(e.target.value)}
-                  disabled={!!planId} // Prevent changing client on edit
+      {/* Lock Banner */}
+      {isLocked && (
+        <div className="mb-6 max-w-6xl mx-auto glass-panel tint-amber border-amber-200/50 flex items-start gap-3 p-4">
+          <LockIcon className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-bold text-sm text-amber-800">Workout Locked</p>
+            <p className="text-xs text-amber-700 mt-0.5">{lockReason}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-6xl mx-auto">
+        {/* Page Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900">
+              {planId ? (isLocked ? "View Workout" : "Edit Workout") : "Build Workout"}
+            </h1>
+            <p className="text-neutral-500 text-sm mt-0.5">
+              {isLocked ? "Read-only view of this workout plan." : "Design the perfect session for your client."}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            {isLocked ? (
+              <>
+                <button
+                  onClick={() => navigate(`/trainer/clients/${clientId}?tab=workouts`)}
+                  className="px-4 py-2 text-sm font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-xl transition-all"
                 >
-                  <option value="">Select a client...</option>
-                  {clients.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <Input
-                type="date"
-                label="Date"
-                value={scheduledDate}
-                onChange={e => setScheduledDate(e.target.value)}
-                required
-              />
-
-              <Input
-                label="Workout Title"
-                placeholder="e.g. Upper Body Power"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                required
-              />
-
-              <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Session Notes (Optional)</label>
-                <textarea
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all resize-none h-24"
-                  placeholder="e.g. Focus on explosive concentric movements."
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                />
-              </div>
-            </div>
+                  ← Back
+                </button>
+                <button
+                  onClick={handleSaveTemplate}
+                  disabled={savingTemplate || exercises.length === 0}
+                  className="px-4 py-2 text-sm font-bold border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-all disabled:opacity-50"
+                >
+                  Save as Template
+                </button>
+              </>
+            ) : (
+              <>
+                {planId && (
+                  <button
+                    onClick={handleDeletePlan}
+                    className="px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                  >
+                    Delete Plan
+                  </button>
+                )}
+                <button
+                  onClick={handleSaveTemplate}
+                  disabled={savingTemplate || exercises.length === 0}
+                  className="px-4 py-2 text-sm font-bold border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-all disabled:opacity-50"
+                >
+                  {savingTemplate ? "Saving…" : "Save as Template"}
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl shadow-md shadow-indigo-200 hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:hover:translate-y-0 flex items-center gap-2"
+                >
+                  {saving && <SpinnerMini />}
+                  {planId ? "Save Changes" : "Save Workout"}
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Right Panel: Builder */}
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-extrabold text-neutral-900">
-              {planId ? "Edit Workout" : "Build Workout"}
-            </h1>
-            <div className="flex items-center gap-2">
-              {planId && (
-                <Button variant="ghost" className="text-rose-600 hover:bg-rose-50 hover:text-rose-700" onClick={handleDeletePlan}>
-                  Delete Plan
-                </Button>
-              )}
-              <Button variant="outline" onClick={handleSaveTemplate} loading={savingTemplate} disabled={exercises.length === 0}>
-                Save as Template
-              </Button>
-              <Button variant="primary" onClick={handleSave} loading={saving}>
-                {planId ? "Save Changes" : "Save Workout"}
-              </Button>
-            </div>
-          </div>
+        {error && <Alert variant="danger" className="mb-5">{error}</Alert>}
 
-          {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* ── Left Panel: Settings ── */}
+          <div className="w-full md:w-80 flex-shrink-0 space-y-4">
+            <div className="glass-panel tint-sky border-sky-100/50 shadow-sm overflow-hidden">
+              <div className="p-5 space-y-4">
+                <h2 className="font-bold text-neutral-900">Workout Settings</h2>
 
-          <div className="space-y-3 mb-6">
-            {exercises.map((ex, index) => (
-              <div key={ex.id || ex._localId} className="card p-4 flex gap-4 group">
-                <div className="pt-2 cursor-move text-neutral-300 hover:text-neutral-500 transition-colors">
-                  <DragIcon className="w-5 h-5" />
+                <div>
+                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Client</label>
+                  <select
+                    className="w-full h-10 px-3 border border-neutral-200 rounded-xl text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+                    value={clientId}
+                    onChange={e => setClientId(e.target.value)}
+                    disabled={!!planId || isLocked}
+                  >
+                    <option value="">Select a client…</option>
+                    {clients.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
                 </div>
-                
-                <div className="flex-1 space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-violet-600 bg-violet-50 px-2 py-0.5 rounded">
-                        {ex.exercise_category || ex.exercise_detail?.category}
-                      </span>
-                      <h3 className="font-bold text-neutral-900 text-lg mt-1">
-                        {ex.exercise_name || ex.exercise_detail?.name}
-                      </h3>
-                    </div>
-                    <button 
-                      onClick={() => removeExercise(index)}
-                      className="text-neutral-400 hover:text-rose-600 p-1 rounded transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-500 mb-1">Sets</label>
-                      <input 
-                        type="number" min="1"
-                        className="w-full h-9 px-3 border border-neutral-200 rounded-md text-sm text-center font-medium"
-                        value={ex.sets}
-                        onChange={e => updateExercise(index, 'sets', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-500 mb-1">Reps</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. 10 or 8-12"
-                        className="w-full h-9 px-3 border border-neutral-200 rounded-md text-sm text-center font-medium"
-                        value={ex.reps}
-                        onChange={e => updateExercise(index, 'reps', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-500 mb-1">Weight (kg)</label>
-                      <input 
-                        type="number" step="0.5" placeholder="BW"
-                        className="w-full h-9 px-3 border border-neutral-200 rounded-md text-sm text-center font-medium"
-                        value={ex.weight_kg || ""}
-                        onChange={e => updateExercise(index, 'weight_kg', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-500 mb-1">Rest (sec)</label>
-                      <input 
-                        type="number" step="5" placeholder="e.g. 90"
-                        className="w-full h-9 px-3 border border-neutral-200 rounded-md text-sm text-center font-medium"
-                        value={ex.rest_seconds || ""}
-                        onChange={e => updateExercise(index, 'rest_seconds', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <input 
-                      type="text"
-                      placeholder="Add exercise notes or cues..."
-                      className="w-full text-sm text-neutral-600 border-none bg-neutral-50 rounded-md px-3 py-1.5 focus:ring-1 focus:ring-violet-500/30"
-                      value={ex.notes || ""}
-                      onChange={e => updateExercise(index, 'notes', e.target.value)}
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Date</label>
+                  <input
+                    type="date"
+                    className="w-full h-10 px-3 border border-neutral-200 rounded-xl text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+                    value={scheduledDate}
+                    onChange={e => setScheduledDate(e.target.value)}
+                    disabled={isLocked}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Workout Title</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Upper Body Power"
+                    className="w-full h-10 px-3 border border-neutral-200 rounded-xl text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    disabled={isLocked}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Session Notes</label>
+                  <textarea
+                    className="w-full px-3 py-2 border border-neutral-200 rounded-xl text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none h-24 disabled:opacity-60"
+                    placeholder="e.g. Focus on explosive concentric movements."
+                    value={notes}
+                    onChange={e => setNotes(e.target.value)}
+                    disabled={isLocked}
+                  />
                 </div>
               </div>
-            ))}
+            </div>
 
-            {exercises.length === 0 && (
-              <div className="card border-dashed border-2 border-neutral-200 bg-transparent flex flex-col items-center justify-center py-12">
-                <div className="w-12 h-12 rounded-full bg-violet-50 text-violet-500 flex items-center justify-center mb-3">
-                  <PlusIcon className="w-6 h-6" />
+            {/* Quick stats */}
+            {exercises.length > 0 && (
+              <div className="glass-panel tint-violet border-indigo-150/30 p-4 shadow-sm hover-lift">
+                <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3">Plan Summary</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white/60 rounded-xl p-3 text-center border border-indigo-150/30">
+                    <p className="text-2xl font-extrabold text-indigo-700">{exercises.length}</p>
+                    <p className="text-[10px] text-indigo-500 font-semibold uppercase tracking-wide mt-0.5">Exercises</p>
+                  </div>
+                  <div className="bg-white/60 rounded-xl p-3 text-center border border-indigo-150/30">
+                    <p className="text-2xl font-extrabold text-indigo-700">
+                      {exercises.reduce((s, ex) => s + (parseInt(ex.sets) || 0), 0)}
+                    </p>
+                    <p className="text-[10px] text-indigo-500 font-semibold uppercase tracking-wide mt-0.5">Total Sets</p>
+                  </div>
                 </div>
-                <h3 className="font-bold text-neutral-900 mb-1">No exercises added</h3>
-                <p className="text-sm text-neutral-500 mb-4">Click below to add exercises from your library.</p>
-                <Button variant="outline" onClick={() => setTemplatePickerOpen(true)}>
-                  <FolderIcon className="w-4 h-4" />
-                  Load Template
-                </Button>
               </div>
             )}
           </div>
 
-          <div className="flex gap-4">
-            <Button variant="outline" className="flex-1 border-dashed" onClick={() => setPickerOpen(true)}>
-              <PlusIcon className="w-4 h-4" />
-              Add Exercise
-            </Button>
-            <Button variant="outline" className="flex-1 border-dashed" onClick={() => setTemplatePickerOpen(true)}>
-              <FolderIcon className="w-4 h-4" />
-              Load Template
-            </Button>
+          {/* ── Right Panel: Exercise Builder ── */}
+          <div className="flex-1 min-w-0">
+            <div className="space-y-3 mb-4">
+              {exercises.map((ex, index) => (
+                <div
+                  key={ex.id || ex._localId}
+                  className="group glass-panel tint-violet border-indigo-150/30 p-5 flex gap-4 hover-lift shadow-sm"
+                >
+                  {!isLocked && (
+                    <div className="pt-2 cursor-move text-neutral-300 hover:text-neutral-500 transition-colors flex-shrink-0">
+                      <DragIcon className="w-5 h-5" />
+                    </div>
+                  )}
+
+                  <div className="flex-1 min-w-0 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-white/85 border border-indigo-100/50 px-2 py-0.5 rounded-md">
+                          {ex.exercise_category || ex.exercise_detail?.category}
+                        </span>
+                        <h3 className="font-bold text-neutral-900 text-base mt-1">
+                          {ex.exercise_name || ex.exercise_detail?.name}
+                        </h3>
+                      </div>
+                      {!isLocked && (
+                        <button
+                          onClick={() => removeExercise(index)}
+                          className="text-neutral-300 hover:text-rose-500 p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100 hover:bg-rose-50"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        { label: "Sets", field: "sets", type: "number", min: "1", placeholder: "" },
+                        { label: "Reps", field: "reps", type: "text", placeholder: "e.g. 10" },
+                        { label: "Weight (kg)", field: "weight_kg", type: "number", step: "0.5", placeholder: "BW" },
+                        { label: "Rest (sec)", field: "rest_seconds", type: "number", step: "5", placeholder: "90" },
+                      ].map(({ label, field, ...inputProps }) => (
+                        <div key={field}>
+                          <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">{label}</label>
+                          <input
+                            {...inputProps}
+                            className="w-full h-9 px-3 border border-neutral-200 rounded-lg text-sm text-center font-semibold bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:bg-neutral-100 disabled:text-neutral-400"
+                            value={field === "weight_kg" ? (ex.weight_kg || "") : (field === "rest_seconds" ? (ex.rest_seconds || "") : ex[field])}
+                            onChange={e => updateExercise(index, field, e.target.value)}
+                            disabled={isLocked}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder={isLocked ? "" : "Add exercise notes or coaching cues…"}
+                      className="w-full text-xs text-neutral-600 border border-neutral-100 bg-neutral-50/60 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500/20 disabled:bg-neutral-100/50 disabled:text-neutral-400"
+                      value={ex.notes || ""}
+                      onChange={e => updateExercise(index, 'notes', e.target.value)}
+                      disabled={isLocked}
+                    />
+                  </div>
+                </div>
+              ))}
+
+              {/* Empty state */}
+              {exercises.length === 0 && (
+                <div className="border-2 border-dashed border-neutral-200 rounded-2xl bg-neutral-50/50 flex flex-col items-center justify-center py-16 text-center px-6">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-500 flex items-center justify-center mb-4">
+                    <DumbbellIcon className="w-7 h-7" />
+                  </div>
+                  <h3 className="font-bold text-neutral-900 mb-1">No exercises yet</h3>
+                  <p className="text-sm text-neutral-500 mb-5">
+                    Add exercises from your library or load a saved template.
+                  </p>
+                  {!isLocked && (
+                    <button
+                      onClick={() => setTemplatePickerOpen(true)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-bold border border-neutral-200 bg-white rounded-xl hover:bg-neutral-50 transition-all shadow-sm"
+                    >
+                      <FolderIcon className="w-4 h-4 text-indigo-500" />
+                      Load Template
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {!isLocked && (
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setPickerOpen(true)}
+                  className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-indigo-200 rounded-2xl text-sm font-bold text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50/50 transition-all"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  Add Exercise
+                </button>
+                <button
+                  onClick={() => setTemplatePickerOpen(true)}
+                  className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-neutral-200 rounded-2xl text-sm font-bold text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50/60 transition-all"
+                >
+                  <FolderIcon className="w-4 h-4" />
+                  Load Template
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <ExercisePicker 
-        isOpen={pickerOpen} 
-        onClose={() => setPickerOpen(false)} 
-        onSelect={handleAddExercise} 
+      <ExercisePicker
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={handleAddExercise}
       />
       <TemplatePicker
         isOpen={templatePickerOpen}
@@ -393,6 +478,15 @@ export default function ScheduleWorkoutPage() {
         onSelect={handleLoadTemplate}
       />
     </TrainerLayout>
+  );
+}
+
+function SpinnerMini() {
+  return (
+    <svg className="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
   );
 }
 
@@ -415,12 +509,9 @@ function FolderIcon({ className }) {
 function DragIcon({ className }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="9" cy="5" r="1" />
-      <circle cx="15" cy="5" r="1" />
-      <circle cx="9" cy="12" r="1" />
-      <circle cx="15" cy="12" r="1" />
-      <circle cx="9" cy="19" r="1" />
-      <circle cx="15" cy="19" r="1" />
+      <circle cx="9" cy="5" r="1" /><circle cx="15" cy="5" r="1" />
+      <circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" />
+      <circle cx="9" cy="19" r="1" /><circle cx="15" cy="19" r="1" />
     </svg>
   );
 }
@@ -430,6 +521,23 @@ function TrashIcon({ className }) {
     <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <polyline points="3 6 5 6 21 6" />
       <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+    </svg>
+  );
+}
+
+function LockIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+function DumbbellIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 3v18M18 3v18M2 9h4v6H2zM18 9h4v6h-4zM6 12h12" />
     </svg>
   );
 }

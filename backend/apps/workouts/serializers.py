@@ -14,11 +14,12 @@ class WorkoutPlanExerciseSerializer(serializers.ModelSerializer):
     exercise_detail = ExerciseSerializer(source='exercise', read_only=True)
     exercise_name = serializers.CharField(source='exercise.name', read_only=True)
     exercise_category = serializers.CharField(source='exercise.category', read_only=True)
+    exercise_demo_link = serializers.CharField(source='exercise.demo_link', read_only=True, allow_null=True)
 
     class Meta:
         model = WorkoutPlanExercise
         fields = [
-            'id', 'exercise', 'exercise_detail', 'exercise_name', 'exercise_category',
+            'id', 'exercise', 'exercise_detail', 'exercise_name', 'exercise_category', 'exercise_demo_link',
             'sets', 'reps', 'weight_kg', 'rest_seconds', 'order', 'notes'
         ]
         read_only_fields = ['id']
@@ -28,15 +29,26 @@ class WorkoutPlanSerializer(serializers.ModelSerializer):
     exercises = WorkoutPlanExerciseSerializer(many=True)
     client_name = serializers.CharField(source='client.name', read_only=True)
     client_email = serializers.CharField(source='client.email', read_only=True)
+    is_completed = serializers.SerializerMethodField()
+    is_past = serializers.SerializerMethodField()
 
     class Meta:
         model = WorkoutPlan
         fields = [
             'id', 'client', 'client_name', 'client_email',
             'scheduled_date', 'title', 'notes',
-            'exercises', 'created_at', 'updated_at'
+            'exercises', 'created_at', 'updated_at',
+            'is_completed', 'is_past'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_is_completed(self, obj):
+        from .models import WorkoutLog
+        return WorkoutLog.objects.filter(client=obj.client, date=obj.scheduled_date, completed=True).exists()
+
+    def get_is_past(self, obj):
+        from django.utils import timezone
+        return obj.scheduled_date < timezone.localdate()
 
     def create(self, validated_data):
         exercises_data = validated_data.pop('exercises', [])
@@ -145,11 +157,12 @@ class WorkoutTemplateListSerializer(serializers.ModelSerializer):
 class WorkoutLogEntrySerializer(serializers.ModelSerializer):
     exercise_name = serializers.CharField(source='exercise.name', read_only=True)
     exercise_category = serializers.CharField(source='exercise.category', read_only=True)
+    exercise_demo_link = serializers.CharField(source='exercise.demo_link', read_only=True, allow_null=True)
 
     class Meta:
         model = WorkoutLogEntry
         fields = [
-            'id', 'exercise', 'exercise_name', 'exercise_category',
+            'id', 'exercise', 'exercise_name', 'exercise_category', 'exercise_demo_link',
             'actual_sets', 'actual_reps', 'actual_weight_kg', 'order', 'notes'
         ]
         read_only_fields = ['id']

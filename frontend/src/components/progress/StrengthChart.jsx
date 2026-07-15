@@ -91,24 +91,24 @@ export default function StrengthChart({ data, pr, unit = "kg", exerciseName }) {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
-          <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider block mb-0.5">Starting Weight</span>
-          <span className="text-lg font-bold text-neutral-800">{initialWeight} <span className="text-xs font-semibold text-neutral-500">{unit}</span></span>
+        <div className="glass-panel tint-violet p-4 border-indigo-100/40 hover-lift shadow-sm">
+          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">Starting Weight</span>
+          <span className="text-lg font-extrabold text-neutral-800">{initialWeight} <span className="text-xs font-semibold text-neutral-500">{unit}</span></span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
-          <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider block mb-0.5">All-Time Max</span>
-          <span className="text-lg font-bold text-neutral-800">{prWeight} <span className="text-xs font-semibold text-neutral-500">{unit}</span></span>
+        <div className="glass-panel tint-amber p-4 border-amber-100/40 hover-lift shadow-sm">
+          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">All-Time Max</span>
+          <span className="text-lg font-extrabold text-neutral-800">{prWeight} <span className="text-xs font-semibold text-neutral-500">{unit}</span></span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
-          <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider block mb-0.5">Net Increase</span>
-          <span className={`inline-flex items-center gap-0.5 text-sm font-bold px-2 py-0.5 rounded-lg ${totalIncrease > 0 ? "text-emerald-600 bg-emerald-50" : "text-neutral-500 bg-neutral-100"}`}>
+        <div className="glass-panel tint-emerald p-4 border-emerald-100/40 hover-lift shadow-sm flex flex-col justify-center">
+          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">Net Increase</span>
+          <span className={`inline-flex items-center gap-0.5 text-sm font-black px-2.5 py-1 rounded-lg w-fit ${totalIncrease > 0 ? "text-emerald-600 bg-emerald-50" : "text-neutral-500 bg-neutral-100"}`}>
             +{totalIncrease.toFixed(1)} {unit}
           </span>
         </div>
       </div>
 
       {/* Recharts LineChart */}
-      <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm h-80">
+      <div className="glass-panel tint-violet p-5 border-indigo-100/40 shadow-md h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 15, right: 15, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
