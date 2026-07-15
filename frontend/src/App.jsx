@@ -11,6 +11,9 @@ import ExerciseLibraryPage from "./pages/ExerciseLibraryPage";
 import ScheduleWorkoutPage from "./pages/ScheduleWorkoutPage";
 import LogWorkoutPage from "./pages/LogWorkoutPage";
 import ViewLogPage from "./pages/ViewLogPage";
+import WeightJourneyPage from "./pages/WeightJourneyPage";
+import StrengthChartsPage from "./pages/StrengthChartsPage";
+import ReviewsFeedPage from "./pages/ReviewsFeedPage";
 
 export default function App() {
   return (
@@ -42,6 +45,9 @@ export default function App() {
             <Route path="/client/dashboard" element={<ClientDashboard />} />
             <Route path="/client/log-workout" element={<LogWorkoutPage />} />
             <Route path="/client/logs/:logId" element={<ViewLogPage />} />
+            <Route path="/client/progress" element={<WeightJourneyPage />} />
+            <Route path="/client/strength" element={<StrengthChartsPage />} />
+            <Route path="/client/reviews" element={<ReviewsFeedPage />} />
           </Route>
 
           {/* Root redirect */}

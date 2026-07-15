@@ -127,6 +127,13 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files (user-uploaded photos, etc.)
+# v1: served privately via an authenticated Django view.
+# Future: swap MEDIA_BACKEND env var to 'S3' / 'GCS' without model changes.
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 

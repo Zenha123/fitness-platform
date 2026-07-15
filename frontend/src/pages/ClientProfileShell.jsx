@@ -2,12 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { clientsApi } from "../api/clients";
+import { progressApi } from "../api/progress";
 import { Button } from "../components/ui/Button";
 import { Spinner, PageLoader } from "../components/ui/Spinner";
 import { Input } from "../components/ui/Input";
 import { Alert } from "../components/ui/Alert";
 import TrainerLayout from "../components/layout/TrainerLayout";
 import WorkoutCalendar from "../components/workouts/WorkoutCalendar";
+import WeightChart from "../components/progress/WeightChart";
+import PhotoTimeline from "../components/progress/PhotoTimeline";
+import StrengthChart from "../components/progress/StrengthChart";
+import ReviewCard from "../components/reviews/ReviewCard";
+import ReviewForm from "../components/reviews/ReviewForm";
 
 export default function ClientProfileShell() {
   const { id } = useParams();
@@ -70,6 +76,9 @@ export default function ClientProfileShell() {
     ? client.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
     : "?";
 
+  // Trainer uses their own unit preference for displaying weight data
+  const unit = user?.weight_unit || "kg";
+
   return (
     <TrainerLayout>
       <div className="mb-4 flex items-center gap-3">
@@ -124,23 +133,19 @@ export default function ClientProfileShell() {
             {[
               { id: "overview", label: "Overview" },
               { id: "workouts", label: "Workouts" },
-              { id: "progress", label: "Progress", disabled: true },
-              { id: "reviews", label: "Reviews", disabled: true },
+              { id: "progress", label: "Progress" },
+              { id: "reviews", label: "Reviews" },
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => !tab.disabled && setActiveTab(tab.id)}
+                onClick={() => setActiveTab(tab.id)}
                 className={`py-4 px-4 font-semibold text-sm whitespace-nowrap border-b-2 transition-colors ${
                   activeTab === tab.id 
                     ? "border-violet-600 text-violet-600" 
-                    : tab.disabled
-                      ? "border-transparent text-neutral-300 cursor-not-allowed"
-                      : "border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300"
+                    : "border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300"
                 }`}
-                disabled={tab.disabled}
               >
                 {tab.label}
-                {tab.disabled && <span className="ml-2 text-[10px] bg-neutral-100 text-neutral-400 px-1.5 py-0.5 rounded-full uppercase tracking-wider">Soon</span>}
               </button>
             ))}
           </div>
@@ -153,6 +158,12 @@ export default function ClientProfileShell() {
           )}
           {activeTab === "workouts" && (
             <WorkoutCalendar clientId={client.id} />
+          )}
+          {activeTab === "progress" && (
+            <ProgressTab clientId={client.id} unit={unit} />
+          )}
+          {activeTab === "reviews" && (
+            <ReviewsTab clientId={client.id} clientName={client.name} />
           )}
         </div>
 
@@ -268,20 +279,244 @@ function OverviewTab({ client, onUpdate }) {
         </div>
       </div>
       
+      
       <div className="space-y-6">
         <div className="card bg-violet-50 border-violet-100">
           <div className="p-6">
-            <h3 className="font-bold text-violet-900 mb-2">Module Previews</h3>
-            <p className="text-sm text-violet-700 leading-relaxed mb-4">
-              Detailed workouts, progress tracking, and reviews will appear in their respective tabs in upcoming modules.
+            <h3 className="font-bold text-violet-900 mb-2">Trainer Tools</h3>
+            <p className="text-sm text-violet-700 leading-relaxed">
+              Use the tabs above to manage workouts, check progress logs, and post feedback review notes for {client.name}.
             </p>
-            <ul className="space-y-2 text-sm text-violet-800 font-medium">
-              <li className="flex items-center gap-2"><CheckCircleIcon className="w-4 h-4 text-violet-500" /> Module 4: Scheduling</li>
-              <li className="flex items-center gap-2"><CheckCircleIcon className="w-4 h-4 text-violet-500" /> Module 5: Logging</li>
-              <li className="flex items-center gap-2"><CheckCircleIcon className="w-4 h-4 text-violet-500" /> Module 6: Progress</li>
-            </ul>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ProgressTab({ clientId, unit }) {
+  const [entries, setEntries] = useState([]);
+  const [exercises, setExercises] = useState([]);
+  const [selectedExerciseId, setSelectedExerciseId] = useState("");
+  const [strengthData, setStrengthData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingChart, setLoadingChart] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchProgressData();
+  }, [clientId]);
+
+  const fetchProgressData = async () => {
+    try {
+      setLoading(true);
+      const [weightLogs, exerciseList] = await Promise.all([
+        progressApi.getWeightEntries({ client: clientId }),
+        progressApi.getStrengthExercises({ client: clientId })
+      ]);
+      setEntries(weightLogs);
+      setExercises(exerciseList);
+      if (exerciseList.length > 0) {
+        setSelectedExerciseId(exerciseList[0].id);
+      }
+    } catch (err) {
+      setError("Failed to load progress logs.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedExerciseId) {
+      fetchStrengthChart(selectedExerciseId);
+    } else {
+      setStrengthData(null);
+    }
+  }, [selectedExerciseId]);
+
+  const fetchStrengthChart = async (exerciseId) => {
+    try {
+      setLoadingChart(true);
+      const data = await progressApi.getStrengthData({ exercise: exerciseId, client: clientId });
+      setStrengthData(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingChart(false);
+    }
+  };
+
+  if (loading) return <div className="py-8 flex justify-center"><Spinner /></div>;
+
+  return (
+    <div className="space-y-8">
+      {error && <Alert variant="danger">{error}</Alert>}
+
+      {/* Weight Trend */}
+      <div className="space-y-3">
+        <h3 className="text-lg font-bold text-neutral-900">Weight Tracking</h3>
+        <WeightChart entries={entries} unit={unit} />
+      </div>
+
+      {/* Photo Journey */}
+      <div className="space-y-3 border-t border-neutral-200 pt-8">
+        <h3 className="text-lg font-bold text-neutral-900">Photo Journey</h3>
+        <PhotoTimeline entries={entries} unit={unit} />
+      </div>
+
+      {/* Strength Tracking */}
+      <div className="space-y-3 border-t border-neutral-200 pt-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h3 className="text-lg font-bold text-neutral-900">Strength Progression</h3>
+          
+          {exercises.length > 0 && (
+            <select
+              className="form-input text-xs font-semibold max-w-xs py-1.5"
+              value={selectedExerciseId}
+              onChange={(e) => setSelectedExerciseId(e.target.value)}
+              disabled={loadingChart}
+            >
+              {exercises.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.name} ({e.category})
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        {exercises.length === 0 ? (
+          <div className="h-48 flex items-center justify-center border-2 border-dashed border-neutral-200 rounded-xl bg-neutral-50 p-6 text-center text-neutral-400 text-sm font-medium">
+            Client has not logged any strength exercise records yet.
+          </div>
+        ) : loadingChart ? (
+          <div className="h-64 flex items-center justify-center"><Spinner /></div>
+        ) : (
+          strengthData && (
+            <StrengthChart
+              data={strengthData.data}
+              pr={strengthData.pr}
+              unit={unit}
+              exerciseName={strengthData.exercise_name}
+            />
+          )
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ReviewsTab({ clientId, clientName }) {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editingReview, setEditingReview] = useState(null);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [clientId]);
+
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      const data = await progressApi.getReviews({ client: clientId });
+      setReviews(data);
+    } catch (err) {
+      setError("Failed to load review notes.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitReview = async (reviewData) => {
+    try {
+      if (editingReview) {
+        await progressApi.updateReview(editingReview.id, reviewData);
+      } else {
+        await progressApi.createReview({
+          client: clientId,
+          ...reviewData
+        });
+      }
+      setShowForm(false);
+      setEditingReview(null);
+      await fetchReviews();
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      await progressApi.deleteReview(reviewId);
+      await fetchReviews();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEditClick = (review) => {
+    setEditingReview(review);
+    setShowForm(true);
+  };
+
+  if (loading) return <div className="py-8 flex justify-center"><Spinner /></div>;
+
+  return (
+    <div className="space-y-6">
+      {error && <Alert variant="danger">{error}</Alert>}
+
+      <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
+        <div>
+          <h3 className="font-bold text-neutral-900">Coaching Reviews</h3>
+          <p className="text-xs text-neutral-400">
+            Provide feedback reviews summarizing progress and improvement areas.
+          </p>
+        </div>
+        {!showForm && (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => {
+              setEditingReview(null);
+              setShowForm(true);
+            }}
+          >
+            Post Review Note
+          </Button>
+        )}
+      </div>
+
+      {showForm && (
+        <ReviewForm
+          clientName={clientName}
+          initialData={editingReview}
+          onSubmit={handleSubmitReview}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingReview(null);
+          }}
+        />
+      )}
+
+      <div className="space-y-6">
+        {reviews.length === 0 ? (
+          <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-neutral-200 rounded-xl bg-neutral-50 p-6 text-center text-neutral-400 text-sm font-medium">
+            <span>No review notes posted yet.</span>
+            <span className="text-xs text-neutral-400 mt-1">Click "Post Review Note" to share feedback with this client.</span>
+          </div>
+        ) : (
+          reviews.map((review) => (
+            <ReviewCard
+              key={review.id}
+              review={review}
+              isTrainer={true}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteReview}
+            />
+          ))
+        )}
       </div>
     </div>
   );
@@ -310,3 +545,4 @@ function CheckCircleIcon({ className }) {
     </svg>
   );
 }
+

@@ -43,6 +43,7 @@ export function AuthProvider({ children }) {
             name: decoded.name,
             role: decoded.role,
             needs_password_change: decoded.needs_password_change,
+            weight_unit: decoded.weight_unit || 'kg',
           });
         }
       }
@@ -93,12 +94,25 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updatePreferences = async (preferenceData) => {
+    try {
+      const response = await axiosClient.patch('/auth/profile/', preferenceData);
+      const updatedUser = { ...user, ...response.data };
+      localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const value = {
     user,
     loading,
     login,
     logout,
     changePassword,
+    updatePreferences,
     isAuthenticated: !!user,
   };
 

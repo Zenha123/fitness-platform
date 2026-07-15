@@ -37,6 +37,12 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=Role.choices)
     needs_password_change = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    weight_unit = models.CharField(
+        max_length=2,
+        choices=[('kg', 'Kilograms'), ('lb', 'Pounds')],
+        default='kg',
+        help_text="Preferred unit for weight entries and workout logs."
+    )
 
     objects = UserManager()
 

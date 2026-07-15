@@ -6,8 +6,16 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'name', 'role', 'needs_password_change', 'created_at')
-        read_only_fields = ('id', 'created_at')
+        fields = ('id', 'email', 'name', 'role', 'needs_password_change', 'created_at', 'weight_unit')
+        read_only_fields = ('id', 'created_at', 'email', 'role', 'needs_password_change')
+
+
+class UserPreferenceSerializer(serializers.ModelSerializer):
+    """Allows clients/trainers to update their own preferences."""
+    class Meta:
+        model = User
+        fields = ('weight_unit',)
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -18,6 +26,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['name'] = user.name
         token['role'] = user.role
         token['needs_password_change'] = user.needs_password_change
+        token['weight_unit'] = user.weight_unit
         return token
 
     def validate(self, attrs):
@@ -28,7 +37,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             'email': self.user.email,
             'name': self.user.name,
             'role': self.user.role,
-            'needs_password_change': self.user.needs_password_change
+            'needs_password_change': self.user.needs_password_change,
+            'weight_unit': self.user.weight_unit,
         }
         return data
 
