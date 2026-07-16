@@ -1,9 +1,15 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import MyTokenObtainPairSerializer, ChangePasswordSerializer, UserSerializer, UserPreferenceSerializer
+from .serializers import (
+    MyTokenObtainPairSerializer, 
+    ChangePasswordSerializer, 
+    UserSerializer, 
+    UserPreferenceSerializer,
+    TrainerRegistrationSerializer
+)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -53,3 +59,16 @@ class UserProfileView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(UserSerializer(request.user).data)
+
+
+class TrainerRegistrationView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = TrainerRegistrationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(
+            {"message": "Trainer account created successfully."},
+            status=status.HTTP_201_CREATED
+        )

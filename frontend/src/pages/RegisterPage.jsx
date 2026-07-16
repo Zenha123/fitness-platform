@@ -1,30 +1,62 @@
 import React, { useState } from "react";
-import { useLocation, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
 import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
 import { Alert } from "../components/ui/Alert";
+import axiosClient from "../api/axiosClient";
 
-export default function LoginPage() {
-  const { login } = useAuth();
-  const location = useLocation();
+export default function RegisterPage() {
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(location.state?.message || "");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
-    if (!email || !password) { setError("Please enter your email and password."); return; }
+    
+    if (!name || !email || !password || !confirmPassword) { 
+      setError("Please fill out all fields."); 
+      return; 
+    }
+    
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
     try {
-      await login(email, password);
+      await axiosClient.post("/auth/register/", {
+        name,
+        email,
+        password,
+        confirm_password: confirmPassword,
+      });
+      navigate("/login", { state: { message: "Trainer account created successfully. Please sign in." } });
     } catch (err) {
-      const detail = err.response?.data?.detail;
-      setError(detail || "Incorrect email or password. Please try again.");
+      // Handle array or object error messages from DRF
+      const errData = err.response?.data;
+      if (errData && typeof errData === 'object') {
+        const messages = [];
+        for (const key in errData) {
+          if (Array.isArray(errData[key])) {
+            messages.push(`${key === 'non_field_errors' ? '' : key + ': '}${errData[key][0]}`);
+          } else if (typeof errData[key] === 'string') {
+            messages.push(errData[key]);
+          }
+        }
+        if (messages.length > 0) {
+          setError(messages.join(" "));
+        } else {
+          setError("Failed to register. Please check your inputs.");
+        }
+      } else {
+        setError("Failed to register. Please try again later.");
+      }
     } finally {
       setLoading(false);
     }
@@ -48,7 +80,7 @@ export default function LoginPage() {
               FitCoach
             </h1>
             <p className="text-neutral-500 text-sm font-medium">
-              Sign in to your account
+              Create a Trainer Account
             </p>
           </div>
 
@@ -58,13 +90,19 @@ export default function LoginPage() {
             </Alert>
           )}
 
-          {success && (
-            <Alert variant="success" className="mb-6 animate-fade-in bg-green-50 text-green-700 border-green-200">
-              {success}
-            </Alert>
-          )}
-
           <form onSubmit={handleSubmit} noValidate className="space-y-6">
+            <Input
+              id="name"
+              label="Full Name"
+              type="text"
+              placeholder="e.g. Jane Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              leftIcon={<UserIcon className="w-5 h-5" />}
+              required
+              autoFocus
+            />
+
             <Input
               id="email"
               label="Email address"
@@ -75,19 +113,30 @@ export default function LoginPage() {
               leftIcon={<MailIcon className="w-5 h-5" />}
               required
               autoComplete="email"
-              autoFocus
             />
 
             <Input
               id="password"
               label="Password"
               type="password"
-              placeholder="Enter your password"
+              placeholder="Create a strong password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               leftIcon={<LockIcon className="w-5 h-5" />}
               required
-              autoComplete="current-password"
+              autoComplete="new-password"
+            />
+
+            <Input
+              id="confirmPassword"
+              label="Confirm Password"
+              type="password"
+              placeholder="Repeat your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              leftIcon={<LockIcon className="w-5 h-5" />}
+              required
+              autoComplete="new-password"
             />
 
             <Button
@@ -98,21 +147,17 @@ export default function LoginPage() {
               size="lg"
               className="mt-4 shadow-xl shadow-indigo-500/20 py-3.5 text-base"
             >
-              Sign in
+              Sign Up
             </Button>
           </form>
 
           {/* Secure Platform Info */}
           <div className="mt-10 pt-8 border-t border-neutral-200/60 text-center">
-            <div className="flex items-center justify-center gap-2 text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
-              <ShieldIcon className="w-4 h-4" />
-              Secure Access
-            </div>
-            <p className="text-[11px] text-neutral-400 leading-relaxed max-w-[260px] mx-auto mb-4">
-              Client accounts are provisioned by coaches. Trainers can sign up below.
+            <p className="text-[13px] text-neutral-500 leading-relaxed max-w-[260px] mx-auto mb-4">
+              Already have an account?
             </p>
-            <Link to="/register" className="text-sm font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
-              Create Trainer Account &rarr;
+            <Link to="/login" className="text-sm font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
+              Sign In Instead &rarr;
             </Link>
           </div>
         </div>
@@ -149,10 +194,10 @@ function LockIcon({ className = "" }) {
   );
 }
 
-function ShieldIcon({ className = "" }) {
+function UserIcon({ className = "" }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
     </svg>
   );
 }
