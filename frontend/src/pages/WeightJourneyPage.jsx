@@ -8,6 +8,7 @@ import { Alert } from "../components/ui/Alert";
 import { PageLoader } from "../components/ui/Spinner";
 import WeightChart from "../components/progress/WeightChart";
 import PhotoTimeline from "../components/progress/PhotoTimeline";
+import ClientLayout from "../components/layout/ClientLayout";
 
 export default function WeightJourneyPage() {
   const { user, updatePreferences } = useAuth();
@@ -127,18 +128,14 @@ export default function WeightJourneyPage() {
   if (loading) return <PageLoader message="Loading progress logs…" />;
 
   return (
-    <div className="min-h-screen pb-20 relative overflow-x-hidden" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-5%] w-[40rem] h-[40rem] rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none animate-bloom" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[35rem] h-[35rem] rounded-full bg-violet-500/10 blur-[80px] pointer-events-none animate-bloom" style={{ animationDelay: "200ms" }} />
-
-      {/* ── Header ── */}
-      <header className="bg-white/40 backdrop-blur-xl border-b border-white/20 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <ClientLayout>
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Page Header */}
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <Link
               to="/client/dashboard"
-              className="p-2 rounded-xl hover:bg-neutral-100 text-neutral-500 transition-colors"
+              className="p-2 rounded-xl hover:bg-neutral-100 text-neutral-500 transition-colors -ml-2"
             >
               <ArrowLeftIcon className="w-5 h-5" />
             </Link>
@@ -167,9 +164,6 @@ export default function WeightJourneyPage() {
             </button>
           </div>
         </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* ── Stats Row ── */}
         {entries.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -363,8 +357,8 @@ export default function WeightJourneyPage() {
             <span>Coach {user?.trainer_name || "Your Coach"}</span>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </ClientLayout>
   );
 }
 

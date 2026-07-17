@@ -6,6 +6,7 @@ import { Button } from "../components/ui/Button";
 import { Alert } from "../components/ui/Alert";
 import { PageLoader } from "../components/ui/Spinner";
 import TrainerLayout from "../components/layout/TrainerLayout";
+import ClientLayout from "../components/layout/ClientLayout";
 
 export default function ViewLogPage() {
   const { logId } = useParams();
@@ -55,7 +56,14 @@ export default function ViewLogPage() {
       : 0;
 
     return (
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-500 hover:text-neutral-900 transition-colors"
+        >
+          <ArrowLeftIcon className="w-4 h-4" />
+          Back
+        </button>
         {/* ── Log Header ── */}
         <div className="glass-panel tint-sky border-sky-100/50 overflow-hidden shadow-md">
           <div className="p-6">
@@ -210,38 +218,9 @@ export default function ViewLogPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 relative overflow-x-hidden" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-5%] w-[40rem] h-[40rem] rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none animate-bloom" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[35rem] h-[35rem] rounded-full bg-violet-500/10 blur-[80px] pointer-events-none animate-bloom" style={{ animationDelay: "200ms" }} />
-
-      {/* Client header */}
-      <header className="bg-white/40 backdrop-blur-xl border-b border-white/20 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/client/dashboard")}
-              className="p-2 rounded-xl hover:bg-neutral-100 text-neutral-500 transition-colors"
-            >
-              <ArrowLeftIcon className="w-5 h-5" />
-            </button>
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)" }}
-            >
-              <BoltIcon className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className="font-bold text-neutral-900">FitCoach</span>
-          </div>
-          <button
-            onClick={() => navigate("/client/dashboard")}
-            className="text-sm font-semibold text-neutral-500 hover:text-neutral-900 transition-colors"
-          >
-            Dashboard →
-          </button>
-        </div>
-      </header>
+    <ClientLayout>
       <LogContent />
-    </div>
+    </ClientLayout>
   );
 }
 

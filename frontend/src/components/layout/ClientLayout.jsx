@@ -20,7 +20,7 @@ export default function ClientLayout({ children }) {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden pb-12" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
+    <div className="min-h-screen relative overflow-x-hidden pb-safe" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
       {/* Background Ambient Blobs */}
       <div className="absolute top-[-150px] left-[-100px] ambient-blob-1"></div>
       <div className="absolute top-[20vh] right-[-200px] ambient-blob-2"></div>
@@ -161,7 +161,7 @@ export default function ClientLayout({ children }) {
       </div>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 page-enter">
+      <main className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10 page-enter">
         {children}
       </main>
     </div>

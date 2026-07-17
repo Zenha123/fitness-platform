@@ -612,6 +612,8 @@
   .tint-amber  { background-color: rgba(245, 158, 11, 0.09); border-color: rgba(245, 158, 11, 0.16); }
   .tint-rose   { background-color: rgba(239, 68, 68, 0.10); border-color: rgba(239, 68, 68, 0.18); }
   .tint-orange { background-color: rgba(255, 122, 89, 0.10); border-color: rgba(255, 122, 89, 0.18); }
+  
+  .pb-safe { padding-bottom: max(2rem, env(safe-area-inset-bottom)); }
 }
 
 @keyframes shimmer {

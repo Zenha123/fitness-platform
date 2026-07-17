@@ -4,6 +4,7 @@ import { progressApi } from "../api/progress";
 import { Alert } from "../components/ui/Alert";
 import { PageLoader } from "../components/ui/Spinner";
 import ReviewCard from "../components/reviews/ReviewCard";
+import ClientLayout from "../components/layout/ClientLayout";
 
 export default function ReviewsFeedPage() {
   const [reviews, setReviews] = useState([]);
@@ -29,16 +30,13 @@ export default function ReviewsFeedPage() {
   if (loading) return <PageLoader message="Loading review notes…" />;
 
   return (
-    <div className="min-h-screen pb-20 relative overflow-x-hidden" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-5%] w-[40rem] h-[40rem] rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none animate-bloom" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[35rem] h-[35rem] rounded-full bg-violet-500/10 blur-[80px] pointer-events-none animate-bloom" style={{ animationDelay: "200ms" }} />
-      {/* ── Header ── */}
-      <header className="bg-white/40 backdrop-blur-xl border-b border-white/20 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
+    <ClientLayout>
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* Page Header */}
+        <div className="flex items-center gap-3 mb-2">
           <Link
             to="/client/dashboard"
-            className="p-2 rounded-xl hover:bg-neutral-100 text-neutral-500 transition-colors"
+            className="p-2 rounded-xl hover:bg-neutral-100 text-neutral-500 transition-colors -ml-2"
           >
             <ArrowLeftIcon className="w-5 h-5" />
           </Link>
@@ -47,9 +45,6 @@ export default function ReviewsFeedPage() {
             <p className="text-xs text-neutral-400">Read-only review notes from your trainer</p>
           </div>
         </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Hero Banner */}
         <div className="relative overflow-hidden rounded-2xl"
           style={{ background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 70%, #a855f7 100%)" }}
@@ -108,8 +103,8 @@ export default function ReviewsFeedPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </ClientLayout>
   );
 }
 

@@ -5,6 +5,7 @@ import { Button } from "../components/ui/Button";
 import { Alert } from "../components/ui/Alert";
 import { PageLoader } from "../components/ui/Spinner";
 import ExercisePicker from "../components/workouts/ExercisePicker";
+import ClientLayout from "../components/layout/ClientLayout";
 
 export default function LogWorkoutPage() {
   const navigate = useNavigate();
@@ -134,14 +135,10 @@ export default function LogWorkoutPage() {
   const isAdHoc = !planId && !logId;
 
   return (
-    <div className="min-h-screen pb-32 relative overflow-x-hidden" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-5%] w-[40rem] h-[40rem] rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none animate-bloom" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[35rem] h-[35rem] rounded-full bg-violet-500/10 blur-[80px] pointer-events-none animate-bloom" style={{ animationDelay: "200ms" }} />
-      
-      {/* ── Sticky Header ── */}
-      <header className="bg-white/40 backdrop-blur-xl border-b border-white/20 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+    <ClientLayout>
+      <div className="max-w-3xl mx-auto space-y-5 pb-24">
+        {/* Page Header */}
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/client/dashboard")}
@@ -170,9 +167,7 @@ export default function LogWorkoutPage() {
             </div>
           )}
         </div>
-      </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-5">
         {error && <Alert variant="danger">{error}</Alert>}
 
         {/* Title */}
@@ -316,10 +311,10 @@ export default function LogWorkoutPage() {
             onChange={(e) => setNotes(e.target.value)}
           />
         </div>
-      </main>
+      </div>
 
       {/* ── Sticky Action Bar ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-neutral-200 px-4 py-4 shadow-2xl z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-neutral-200 px-4 py-4 pb-safe shadow-2xl z-40">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           {!completed && (
             <button
@@ -346,7 +341,7 @@ export default function LogWorkoutPage() {
         onClose={() => setPickerOpen(false)}
         onSelect={handleAddExercise}
       />
-    </div>
+    </ClientLayout>
   );
 }
 
