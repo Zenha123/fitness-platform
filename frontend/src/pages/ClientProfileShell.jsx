@@ -129,31 +129,36 @@ export default function ClientProfileShell() {
             </div>
           </div>
           
-          {/* Tabs header row */}
-          <div className="border-t border-neutral-200/80 px-6 sm:px-8 flex overflow-x-auto hide-scrollbar bg-neutral-50/50">
-            {[
-              { id: "overview", label: "Overview", icon: OverviewIcon },
-              { id: "workouts", label: "Workout Schedule", icon: CalendarIcon },
-              { id: "progress", label: "Transformation logs", icon: ProgressIcon },
-              { id: "reviews", label: "Coaching Notes", icon: ReviewIcon },
-            ].map(tab => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-5 font-bold text-sm whitespace-nowrap border-b-2 transition-all flex items-center gap-2 -mb-px ${
-                    isActive 
-                      ? "border-primary text-primary" 
-                      : "border-transparent text-neutral-400 hover:text-neutral-700 hover:border-neutral-200"
-                  }`}
-                >
-                  <tab.icon className={`w-4 h-4 ${isActive ? "text-primary" : "text-neutral-400"}`} />
+        </div>
+
+        {/* Navigation Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up" style={{ animationDelay: "100ms" }}>
+          {[
+            { id: "overview", label: "Overview", icon: OverviewIcon, tint: "tint-violet", color: "text-indigo-600", bg: "bg-indigo-100/50", border: "border-indigo-100/50" },
+            { id: "workouts", label: "Schedule", icon: CalendarIcon, tint: "tint-sky", color: "text-sky-600", bg: "bg-sky-100/50", border: "border-sky-100/50" },
+            { id: "progress", label: "Transformation", icon: ProgressIcon, tint: "tint-orange", color: "text-orange-600", bg: "bg-orange-100/50", border: "border-orange-100/50" },
+            { id: "reviews", label: "Coaching Notes", icon: ReviewIcon, tint: "tint-emerald", color: "text-emerald-600", bg: "bg-emerald-100/50", border: "border-emerald-100/50" },
+          ].map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`glass-panel p-5 flex flex-col items-center justify-center text-center gap-3 transition-all duration-200 ${
+                  isActive 
+                    ? `${tab.tint} ${tab.border} ring-1 ring-black/5 shadow-md scale-[1.02]` 
+                    : "hover-lift border-neutral-200/60 opacity-80 hover:opacity-100 hover:bg-white/60"
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isActive ? tab.bg + ' ' + tab.color : 'bg-neutral-100 text-neutral-500'}`}>
+                  <tab.icon className="w-6 h-6" />
+                </div>
+                <span className={`text-sm font-extrabold ${isActive ? 'text-neutral-900' : 'text-neutral-500'}`}>
                   {tab.label}
-                </button>
-              );
-            })}
-          </div>
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab body content panels */}

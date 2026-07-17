@@ -131,30 +131,30 @@ export default function WeightJourneyPage() {
     <ClientLayout>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Page Header */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-row items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3 min-w-0">
             <Link
               to="/client/dashboard"
-              className="p-2 rounded-xl hover:bg-neutral-100 text-neutral-500 transition-colors -ml-2"
+              className="p-2 rounded-xl hover:bg-neutral-100 text-neutral-500 transition-colors shrink-0 -ml-2"
             >
               <ArrowLeftIcon className="w-5 h-5" />
             </Link>
-            <div>
-              <h1 className="font-extrabold text-base text-neutral-900">Weight & Photo Journey</h1>
-              <p className="text-xs text-neutral-400">Track your body composition over time</p>
+            <div className="min-w-0">
+              <h1 className="font-extrabold text-lg sm:text-xl text-neutral-900 truncate">Weight & Photo Journey</h1>
+              <p className="text-xs sm:text-sm text-neutral-400 truncate">Track your body composition over time</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleUnitToggle}
-              className="text-xs font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-1.5 rounded-xl border border-neutral-200 transition-colors"
+              className="text-xs font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-2 rounded-xl border border-neutral-200 transition-colors"
             >
               {unit.toUpperCase()}
             </button>
             <button
               onClick={() => setShowLogForm(!showLogForm)}
-              className={`px-4 py-2 text-sm font-bold rounded-xl transition-all ${
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap ${
                 showLogForm
                   ? "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
                   : "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-200 hover:-translate-y-0.5"
