@@ -325,7 +325,7 @@ export default function LogWorkoutPage() {
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           {!completed && (
             <button
-              className="flex-1 py-3 text-sm font-bold border-2 border-[var(--color-border)] text-[var(--color-ink)] rounded-[var(--radius-md)] hover:bg-black/5 hover:border-[var(--color-ink)] transition-all disabled:opacity-60"
+              className="flex-1 h-12 px-4 flex items-center justify-center text-xs sm:text-sm font-bold uppercase tracking-wider border-2 border-[var(--color-border)] text-[var(--color-ink)] rounded-[var(--radius-md)] hover:bg-black/5 hover:border-[var(--color-ink)] transition-all disabled:opacity-60"
               onClick={() => handleSave(false)}
               disabled={saving}
             >
@@ -333,12 +333,12 @@ export default function LogWorkoutPage() {
             </button>
           )}
           <button
-            className="flex-1 py-3 text-sm font-bold text-white bg-[var(--color-ink)] hover:bg-[var(--color-ink)]/90 rounded-[var(--radius-md)] shadow-sm hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:hover:translate-y-0 flex items-center justify-center gap-2 uppercase tracking-wider"
+            className="flex-1 h-12 px-4 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider border-2 border-transparent text-white bg-[var(--color-ink)] hover:bg-[var(--color-ink)]/90 rounded-[var(--radius-md)] shadow-sm transition-all disabled:opacity-60"
             onClick={() => handleSave(true)}
             disabled={saving}
           >
             {saving && <SpinnerMini />}
-            {completed ? "Update Log" : "Complete Workout ✓"}
+            {completed ? "Update Log" : "Complete Workout"}
           </button>
         </div>
       </div>
