@@ -9,6 +9,7 @@ import { PageLoader } from "../components/ui/Spinner";
 import WeightChart from "../components/progress/WeightChart";
 import PhotoTimeline from "../components/progress/PhotoTimeline";
 import ClientLayout from "../components/layout/ClientLayout";
+import PageContainer from "../components/layout/PageContainer";
 
 export default function WeightJourneyPage() {
   const { user, updatePreferences } = useAuth();
@@ -28,21 +29,22 @@ export default function WeightJourneyPage() {
 
   const unit = user?.weight_unit || "kg";
 
-  useEffect(() => {
-    fetchEntries();
-  }, []);
-
   const fetchEntries = async () => {
     try {
       setLoading(true);
       const data = await progressApi.getWeightEntries();
-      setEntries(data);
+      setEntries(data || []);
     } catch (err) {
+      console.error("Failed to load weight entries", err);
       setError("Failed to load progress logs.");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchEntries();
+  }, []);
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
@@ -129,7 +131,7 @@ export default function WeightJourneyPage() {
 
   return (
     <ClientLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <PageContainer variant="dashboard" className="space-y-6">
         {/* Page Header */}
         <div className="flex flex-row items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3 min-w-0">
@@ -140,7 +142,7 @@ export default function WeightJourneyPage() {
               <ArrowLeftIcon className="w-5 h-5" />
             </Link>
             <div className="min-w-0">
-              <h1 className="font-extrabold text-lg sm:text-xl text-neutral-900 truncate">Weight & Photo Journey</h1>
+              <h1 className="text-lg sm:text-xl text-neutral-900 truncate">Weight & Photo Journey</h1>
               <p className="text-xs sm:text-sm text-neutral-400 truncate">Track your body composition over time</p>
             </div>
           </div>
@@ -148,16 +150,16 @@ export default function WeightJourneyPage() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleUnitToggle}
-              className="text-xs font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-2 rounded-xl border border-neutral-200 transition-colors"
+              className="text-xs font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-2 rounded-[var(--radius-md)] border border-[var(--color-border)] transition-colors"
             >
               {unit.toUpperCase()}
             </button>
             <button
               onClick={() => setShowLogForm(!showLogForm)}
-              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-[var(--radius-md)] transition-all whitespace-nowrap ${
                 showLogForm
-                  ? "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-                  : "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-200 hover:-translate-y-0.5"
+                  ? "bg-neutral-100 text-[var(--color-ink)] hover:bg-neutral-200"
+                  : "bg-[var(--color-ink)] text-white shadow-sm hover:-translate-y-0.5"
               }`}
             >
               {showLogForm ? "Close" : "Log Check-in"}
@@ -167,32 +169,32 @@ export default function WeightJourneyPage() {
         {/* ── Stats Row ── */}
         {entries.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <div className="glass-panel tint-sky border-sky-100/50 p-4 shadow-sm text-center hover-lift">
-              <p className="text-2xl font-extrabold text-neutral-900">{entries.length}</p>
-              <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mt-1">Check-ins</p>
+            <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-4 shadow-sm text-center hover-lift">
+              <p className="text-2xl font-extrabold text-[var(--color-ink)]">{entries.length}</p>
+              <p className="text-xs font-semibold text-[var(--color-steel)] uppercase tracking-wide mt-1">Check-ins</p>
             </div>
-            <div className="glass-panel tint-violet border-indigo-100/50 p-4 shadow-sm text-center hover-lift">
-              <p className="text-2xl font-extrabold text-neutral-900">
+            <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-4 shadow-sm text-center hover-lift">
+              <p className="text-2xl font-extrabold text-[var(--color-ink)]">
                 {lastWeight}{unit}
               </p>
-              <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mt-1">Current Weight</p>
+              <p className="text-xs font-semibold text-[var(--color-steel)] uppercase tracking-wide mt-1">Current Weight</p>
             </div>
             {weightDelta !== null && (
-              <div className={`glass-panel p-4 shadow-sm text-center col-span-2 sm:col-span-1 hover-lift ${
+              <div className={`bg-[var(--color-paper)] border rounded-[var(--radius-xl)] p-4 shadow-sm text-center col-span-2 sm:col-span-1 hover-lift ${
                 parseFloat(weightDelta) < 0
-                  ? "tint-emerald border-emerald-200/50"
+                  ? "border-emerald-200"
                   : parseFloat(weightDelta) > 0
-                  ? "tint-rose border-rose-200/50"
-                  : "border-neutral-200/50"
+                  ? "border-rose-200"
+                  : "border-[var(--color-border)]"
               }`}>
                 <p className={`text-2xl font-extrabold ${
                   parseFloat(weightDelta) < 0 ? "text-emerald-700"
                   : parseFloat(weightDelta) > 0 ? "text-rose-700"
-                  : "text-neutral-700"
+                  : "text-[var(--color-ink)]"
                 }`}>
                   {parseFloat(weightDelta) > 0 ? "+" : ""}{weightDelta}{unit}
                 </p>
-                <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mt-1">Total Change</p>
+                <p className="text-xs font-semibold text-[var(--color-steel)] uppercase tracking-wide mt-1">Total Change</p>
               </div>
             )}
           </div>
@@ -200,7 +202,7 @@ export default function WeightJourneyPage() {
 
         {/* Cadence reminder */}
         {showCadenceReminder && (
-          <div className="glass-panel tint-amber border-amber-200/50 flex items-start gap-3 p-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-[var(--radius-xl)] flex items-start gap-3 p-4">
             <BellIcon className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
             <div>
               <p className="font-bold text-sm text-amber-800">Time for a Check-in!</p>
@@ -216,13 +218,13 @@ export default function WeightJourneyPage() {
 
         {/* ── Check-in Form ── */}
         {showLogForm && (
-          <div className="glass-panel-elevated tint-violet border-indigo-150/30 overflow-hidden shadow-xl">
+          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] overflow-hidden shadow-sm">
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
-              <h3 className="font-extrabold text-neutral-900 text-lg">Log Current Weight & Photo</h3>
+              <h3 className="text-[var(--color-ink)] text-lg">Log Current Weight & Photo</h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider mb-1.5">
                     Weight ({unit}) *
                   </label>
                   <input
@@ -234,11 +236,11 @@ export default function WeightJourneyPage() {
                     onChange={(e) => setWeight(e.target.value)}
                     disabled={formLoading}
                     required
-                    className="w-full h-11 px-4 bg-neutral-50 border border-neutral-200 rounded-xl text-sm font-semibold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+                    className="w-full h-11 px-4 bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all disabled:opacity-60"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Date *</label>
+                  <label className="block text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider mb-1.5">Date *</label>
                   <input
                     id="log-date"
                     type="date"
@@ -246,19 +248,19 @@ export default function WeightJourneyPage() {
                     onChange={(e) => setDate(e.target.value)}
                     disabled={formLoading}
                     required
-                    className="w-full h-11 px-4 bg-neutral-50 border border-neutral-200 rounded-xl text-sm font-semibold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+                    className="w-full h-11 px-4 bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all disabled:opacity-60"
                   />
                 </div>
               </div>
 
               {/* Photo upload */}
               <div>
-                <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider mb-1.5">
                   Progress Photo (Optional)
                 </label>
-                <div className="flex flex-col sm:flex-row items-center gap-4 border-2 border-dashed border-neutral-200 rounded-xl p-4 bg-neutral-50/50 hover:border-indigo-300 transition-colors">
+                <div className="flex flex-col sm:flex-row items-center gap-4 border-2 border-dashed border-[var(--color-border)] rounded-[var(--radius-xl)] p-4 bg-black/5 hover:border-[var(--color-ink)] transition-colors">
                   {photoPreview ? (
-                    <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-neutral-200 shadow-sm flex-shrink-0">
+                    <div className="relative w-24 h-24 rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] shadow-sm flex-shrink-0">
                       <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
                       <button
                         type="button"
@@ -295,12 +297,12 @@ export default function WeightJourneyPage() {
 
               {/* Notes */}
               <div>
-                <label htmlFor="log-notes" className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
+                <label htmlFor="log-notes" className="block text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider mb-1.5">
                   Check-in Notes (Optional)
                 </label>
                 <textarea
                   id="log-notes"
-                  className="w-full min-h-[80px] px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                  className="w-full min-h-[80px] px-4 py-3 bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] text-sm text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all resize-none"
                   placeholder="How do you feel? E.g., 'feeling lean', 'post-workout check-in'"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
@@ -313,14 +315,14 @@ export default function WeightJourneyPage() {
                   type="button"
                   onClick={() => { setShowLogForm(false); setPhoto(null); setPhotoPreview(null); }}
                   disabled={formLoading}
-                  className="px-4 py-2 text-sm font-semibold text-neutral-600 hover:bg-neutral-100 rounded-xl transition-all"
+                  className="px-4 py-2 text-sm font-semibold text-[var(--color-steel)] hover:bg-black/5 rounded-[var(--radius-md)] transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl shadow-md shadow-indigo-200 hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:hover:translate-y-0 flex items-center gap-2"
+                  className="px-5 py-2 text-sm font-bold text-white bg-[var(--color-ink)] hover:bg-[var(--color-ink)]/90 rounded-[var(--radius-md)] shadow-sm hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:hover:translate-y-0 flex items-center gap-2"
                 >
                   {formLoading && <SpinnerMini />}
                   Log Entry
@@ -333,16 +335,16 @@ export default function WeightJourneyPage() {
         {/* ── Charts & Timeline ── */}
         <div className="space-y-8">
           <div className="space-y-2">
-            <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-              <TrendIcon className="w-5 h-5 text-indigo-500" />
+            <h2 className="text-xl text-[var(--color-ink)] flex items-center gap-2">
+              <TrendIcon className="w-5 h-5 text-[var(--color-ink)]" />
               Weight Trend
             </h2>
             <WeightChart entries={entries} unit={unit} />
           </div>
 
-          <div className="space-y-2 border-t border-neutral-200 pt-8">
-            <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-              <CameraIcon className="w-5 h-5 text-indigo-500" />
+          <div className="space-y-2 border-t border-[var(--color-border)] pt-8">
+            <h2 className="text-xl text-[var(--color-ink)] flex items-center gap-2">
+              <CameraIcon className="w-5 h-5 text-[var(--color-ink)]" />
               Photo Journey & Progression
             </h2>
             <PhotoTimeline entries={entries} unit={unit} />
@@ -357,7 +359,7 @@ export default function WeightJourneyPage() {
             <span>Coach {user?.trainer_name || "Your Coach"}</span>
           </div>
         </div>
-      </div>
+      </PageContainer>
     </ClientLayout>
   );
 }

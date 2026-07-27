@@ -66,22 +66,22 @@ export default function StrengthChart({ data, pr, unit = "kg", exerciseName }) {
   return (
     <div className="space-y-6">
       {/* Exercise and PR Banner */}
-      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-6 rounded-2xl text-white shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-[var(--color-ink)] p-6 rounded-[var(--radius-xl)] text-white shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-[var(--color-ink)]">
         <div>
-          <span className="text-xs uppercase tracking-wider font-bold text-violet-200">Strength Progress</span>
-          <h2 className="text-2xl font-black mt-0.5">{exerciseName || "Exercise"}</h2>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-steel)]">Strength Progress</span>
+          <h2 className="text-2xl mt-0.5">{exerciseName || "Exercise"}</h2>
         </div>
         {pr && (
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-3 rounded-xl flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-amber-400 text-neutral-900 flex items-center justify-center text-lg font-bold shadow-sm">
+          <div className="bg-white/5 border border-white/10 px-4 py-3 rounded-[var(--radius-lg)] flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[var(--color-signal)] text-white flex items-center justify-center text-lg font-bold shadow-sm">
               🏆
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-violet-200 tracking-wider">Personal Record</span>
-              <p className="text-lg font-black leading-none mt-1">
-                {prWeight} <span className="text-xs font-semibold text-violet-200">{unit}</span>
+              <span className="text-[10px] uppercase font-bold text-[var(--color-steel)] tracking-wider">Personal Record</span>
+              <p className="text-lg leading-none mt-1 font-display uppercase tracking-wider">
+                {prWeight} <span className="text-xs font-semibold text-[var(--color-steel-light)]">{unit}</span>
               </p>
-              <p className="text-[10px] text-violet-100 font-semibold mt-0.5">
+              <p className="text-[10px] text-[var(--color-steel)] font-semibold mt-0.5">
                 Achieved: {new Date(pr.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
               </p>
             </div>
@@ -91,24 +91,24 @@ export default function StrengthChart({ data, pr, unit = "kg", exerciseName }) {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="glass-panel tint-violet p-4 border-indigo-100/40 hover-lift shadow-sm">
-          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">Starting Weight</span>
-          <span className="text-lg font-extrabold text-neutral-800">{initialWeight} <span className="text-xs font-semibold text-neutral-500">{unit}</span></span>
+        <div className="bg-white border border-[var(--color-border)] p-4 rounded-[var(--radius-lg)] hover:-translate-y-1 hover:shadow-md transition-all shadow-sm">
+          <span className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-wider block mb-0.5">Starting Weight</span>
+          <span className="text-lg text-[var(--color-ink)] font-display uppercase tracking-wider">{initialWeight} <span className="text-xs font-semibold text-[var(--color-steel)]">{unit}</span></span>
         </div>
-        <div className="glass-panel tint-amber p-4 border-amber-100/40 hover-lift shadow-sm">
-          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">All-Time Max</span>
-          <span className="text-lg font-extrabold text-neutral-800">{prWeight} <span className="text-xs font-semibold text-neutral-500">{unit}</span></span>
+        <div className="bg-white border border-[var(--color-border)] p-4 rounded-[var(--radius-lg)] hover:-translate-y-1 hover:shadow-md transition-all shadow-sm">
+          <span className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-wider block mb-0.5">All-Time Max</span>
+          <span className="text-lg text-[var(--color-ink)] font-display uppercase tracking-wider">{prWeight} <span className="text-xs font-semibold text-[var(--color-steel)]">{unit}</span></span>
         </div>
-        <div className="glass-panel tint-emerald p-4 border-emerald-100/40 hover-lift shadow-sm flex flex-col justify-center">
-          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">Net Increase</span>
-          <span className={`inline-flex items-center gap-0.5 text-sm font-black px-2.5 py-1 rounded-lg w-fit ${totalIncrease > 0 ? "text-emerald-600 bg-emerald-50" : "text-neutral-500 bg-neutral-100"}`}>
+        <div className="bg-white border border-[var(--color-border)] p-4 rounded-[var(--radius-lg)] hover:-translate-y-1 hover:shadow-md transition-all shadow-sm flex flex-col justify-center">
+          <span className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-wider block mb-0.5">Net Increase</span>
+          <span className={`inline-flex items-center gap-0.5 text-sm font-black px-2.5 py-1 rounded-[var(--radius-sm)] w-fit ${totalIncrease > 0 ? "text-emerald-600 bg-emerald-50" : "text-[var(--color-steel)] bg-black/5"}`}>
             +{totalIncrease.toFixed(1)} {unit}
           </span>
         </div>
       </div>
 
       {/* Recharts LineChart */}
-      <div className="glass-panel tint-violet p-5 border-indigo-100/40 shadow-md h-80">
+      <div className="bg-white border border-[var(--color-border)] p-5 rounded-[var(--radius-xl)] shadow-sm h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 15, right: 15, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
@@ -132,11 +132,11 @@ export default function StrengthChart({ data, pr, unit = "kg", exerciseName }) {
                 if (active && payload && payload.length) {
                   const item = payload[0].payload;
                   return (
-                    <div className="bg-neutral-900 text-white px-3 py-2 rounded-lg text-xs shadow-lg border border-neutral-800">
-                      <p className="font-semibold text-neutral-300">{item.rawDate}</p>
+                    <div className="bg-[var(--color-ink)] text-white px-3 py-2 rounded-[var(--radius-sm)] text-xs shadow-lg border border-[var(--color-steel)]/30">
+                      <p className="font-semibold text-[var(--color-steel-light)]">{item.rawDate}</p>
                       <p className="font-bold text-white mt-0.5 flex items-center gap-1.5">
-                        Weight: <span className="text-violet-400">{payload[0].value} {unit}</span>
-                        {item.isPR && <span className="bg-amber-500 text-neutral-900 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">🏆 PR</span>}
+                        Weight: <span className="text-white">{payload[0].value} {unit}</span>
+                        {item.isPR && <span className="bg-[var(--color-signal)] text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">🏆 PR</span>}
                       </p>
                     </div>
                   );

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
 import { Alert } from "../components/ui/Alert";
+import PageContainer from "../components/layout/PageContainer";
 
 const REQUIREMENTS = [
   { id: "length",  label: "At least 8 characters",              test: (p) => p.length >= 8 },
@@ -71,7 +72,7 @@ export default function ChangePasswordPage() {
       <div className="absolute bottom-[-15%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-violet-500/10 blur-[100px] pointer-events-none animate-bloom" style={{ animationDelay: "200ms" }} />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[25rem] h-[25rem] rounded-full bg-sky-400/6 blur-[80px] pointer-events-none" />
 
-      <div className="w-full max-w-lg relative page-enter">
+      <PageContainer variant="form" className="relative page-enter">
         {/* Brand header */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-3">
@@ -90,7 +91,7 @@ export default function ChangePasswordPage() {
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-violet-50 border border-violet-100 mb-4">
                 <ShieldIcon className="w-7 h-7 text-violet-600" />
               </div>
-              <h1 className="text-2xl font-extrabold text-neutral-900 mb-2">
+              <h1 className="text-2xl text-neutral-900 mb-2">
                 Secure your account
               </h1>
               <p className="text-neutral-500 text-sm leading-relaxed">
@@ -198,7 +199,7 @@ export default function ChangePasswordPage() {
         <p className="mt-6 text-center text-xs text-neutral-400">
           © {new Date().getFullYear()} FitCoach Platform · All rights reserved
         </p>
-      </div>
+      </PageContainer>
     </div>
   );
 }

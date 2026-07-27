@@ -49,7 +49,7 @@ export default function ReviewForm({ clientName, initialData, onSubmit, onCancel
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
       <div className="bg-neutral-50 border-b border-neutral-100 p-5">
-        <h3 className="font-extrabold text-neutral-900 text-base">
+        <h3 className="text-neutral-900 text-base">
           {initialData ? "Edit Coaching Review Note" : `New Review Note for ${clientName}`}
         </h3>
         <p className="text-xs text-neutral-400 mt-1">

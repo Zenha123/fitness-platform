@@ -6,6 +6,7 @@ import { Spinner } from "../components/ui/Spinner";
 import { Alert } from "../components/ui/Alert";
 import AddClientModal from "../components/clients/AddClientModal";
 import TrainerLayout from "../components/layout/TrainerLayout";
+import PageContainer from "../components/layout/PageContainer";
 import { clientsApi } from "../api/clients";
 
 export default function TrainerDashboard() {
@@ -43,19 +44,19 @@ export default function TrainerDashboard() {
 
   return (
     <TrainerLayout>
-      <div className="space-y-8 max-w-7xl mx-auto">
+      <PageContainer variant="dashboard" className="space-y-8">
         {/* Welcome Hero Banner */}
-        <div className="relative overflow-hidden rounded-3xl hero-gradient p-8 sm:p-10 text-white shadow-lg animate-slide-up">
+        <div className="relative overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--color-ink)] p-8 sm:p-10 text-white shadow-lg animate-slide-up">
           {/* Subtle overlay decorative lines */}
           <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
           <div className="absolute top-[-50px] right-[-50px] w-64 h-64 rounded-full bg-white/5 blur-2xl" />
 
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-orange-300">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-md)] bg-white/10 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-orange-300 border border-white/10">
                 ✨ Coach Workspace
               </span>
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mt-3 text-white">
+              <h1 className="text-3xl sm:text-4xl mt-3 text-white">
                 Welcome back, {user?.name.split(" ")[0]}!
               </h1>
               <p className="text-white/70 mt-2 text-sm sm:text-base max-w-xl font-medium">
@@ -79,42 +80,42 @@ export default function TrainerDashboard() {
         {/* Metric Summary Widgets Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up" style={{ animationDelay: "100ms" }}>
           {/* Card 1 */}
-          <div className="glass-panel tint-violet hover-lift p-6 flex items-center gap-5 border-indigo-100/50">
-            <div className="w-14 h-14 rounded-2xl bg-indigo-100/50 text-primary flex items-center justify-center flex-shrink-0">
+          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm hover-lift p-6 flex items-center gap-5">
+            <div className="w-14 h-14 rounded-[var(--radius-md)] bg-black/5 text-[var(--color-ink)] border border-[var(--color-border)] flex items-center justify-center flex-shrink-0">
               <UsersIcon className="w-7 h-7" />
             </div>
             <div>
-              <span className="block text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Total Clients</span>
-              <span className="text-3xl font-black text-neutral-900 leading-none">{loading ? "..." : totalClients}</span>
+              <span className="block text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Total Clients</span>
+              <span className="text-3xl font-black text-[var(--color-ink)] leading-none">{loading ? "..." : totalClients}</span>
             </div>
           </div>
           {/* Card 2 */}
-          <div className="glass-panel tint-emerald hover-lift p-6 flex items-center gap-5 border-emerald-100/50">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-100/50 text-success flex items-center justify-center flex-shrink-0">
+          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm hover-lift p-6 flex items-center gap-5">
+            <div className="w-14 h-14 rounded-[var(--radius-md)] bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center flex-shrink-0">
               <ActiveIcon className="w-7 h-7" />
             </div>
             <div>
-              <span className="block text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Active Roster</span>
-              <span className="text-3xl font-black text-neutral-900 leading-none">{loading ? "..." : activeClients}</span>
+              <span className="block text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Active Roster</span>
+              <span className="text-3xl font-black text-[var(--color-ink)] leading-none">{loading ? "..." : activeClients}</span>
             </div>
           </div>
           {/* Card 3 */}
-          <div className="glass-panel tint-amber hover-lift p-6 flex items-center gap-5 border-amber-100/50">
-            <div className="w-14 h-14 rounded-2xl bg-amber-100/50 text-warning flex items-center justify-center flex-shrink-0">
+          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm hover-lift p-6 flex items-center gap-5">
+            <div className="w-14 h-14 rounded-[var(--radius-md)] bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center flex-shrink-0">
               <SetupIcon className="w-7 h-7" />
             </div>
             <div>
-              <span className="block text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Pending Setup</span>
-              <span className="text-3xl font-black text-neutral-900 leading-none">{loading ? "..." : pendingClients}</span>
+              <span className="block text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Pending Setup</span>
+              <span className="text-3xl font-black text-[var(--color-ink)] leading-none">{loading ? "..." : pendingClients}</span>
             </div>
           </div>
           {/* Card 4 */}
-          <div className="glass-panel tint-rose hover-lift p-6 flex items-center gap-5 border-rose-100/50">
-            <div className="w-14 h-14 rounded-2xl bg-rose-100/50 text-danger flex items-center justify-center flex-shrink-0">
+          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm hover-lift p-6 flex items-center gap-5">
+            <div className="w-14 h-14 rounded-[var(--radius-md)] bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center flex-shrink-0">
               <AlertCircleIcon className="w-7 h-7" />
             </div>
             <div>
-              <span className="block text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Missed Alerts</span>
+              <span className="block text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Missed Alerts</span>
               <span className="text-3xl font-black text-rose-600 leading-none">{loading ? "..." : flaggedClients}</span>
             </div>
           </div>
@@ -123,10 +124,10 @@ export default function TrainerDashboard() {
         {error && <Alert variant="danger" className="mb-6">{error}</Alert>}
 
         {/* Client Grid Header */}
-        <div className="flex items-center justify-between border-b border-neutral-200/80 pb-4">
-          <h2 className="text-xl font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
+        <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
+          <h2 className="text-xl text-[var(--color-ink)] flex items-center gap-2">
             <span>Roster Database</span>
-            <span className="text-xs bg-neutral-100 text-neutral-500 font-extrabold px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-black/5 border border-[var(--color-border)] text-[var(--color-ink)] font-bold px-2 py-0.5 rounded-[var(--radius-md)]">
               {clients.length}
             </span>
           </h2>
@@ -136,16 +137,16 @@ export default function TrainerDashboard() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="glass-panel h-48 skeleton p-5" />
+              <div key={n} className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] h-48 skeleton p-5" />
             ))}
           </div>
         ) : clients.length === 0 ? (
-          <div className="glass-panel-elevated p-10 flex flex-col items-center justify-center text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-primary flex items-center justify-center mb-5">
+          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] shadow-sm rounded-[var(--radius-xl)] p-10 flex flex-col items-center justify-center text-center py-16">
+            <div className="w-16 h-16 rounded-[var(--radius-md)] bg-black/5 border border-[var(--color-border)] text-[var(--color-ink)] flex items-center justify-center mb-5">
               <UsersIcon className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-bold text-neutral-900 mb-2">No active clients</h3>
-            <p className="text-sm text-neutral-500 max-w-sm leading-relaxed mb-6">
+            <h3 className="text-lg text-[var(--color-ink)] mb-2">No active clients</h3>
+            <p className="text-sm text-[var(--color-steel)] max-w-sm leading-relaxed mb-6">
               Get started by adding your first client to your list. They will receive credentials immediately.
             </p>
             <Button variant="outline" onClick={() => setIsModalOpen(true)}>
@@ -159,7 +160,7 @@ export default function TrainerDashboard() {
             ))}
           </div>
         )}
-      </div>
+      </PageContainer>
 
       <AddClientModal 
         isOpen={isModalOpen} 
@@ -189,26 +190,26 @@ function ClientCard({ client }) {
 
   return (
     <Link to={`/trainer/clients/${client.id}`} className="block group">
-      <div className={`${panelClass} hover-lift h-full overflow-hidden relative shadow-md`}>
+      <div className={`bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] hover-lift h-full overflow-hidden relative shadow-sm`}>
         {/* Accent indicator line */}
         <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${
-          client.is_active ? (isFlagged ? "bg-rose-500" : "bg-indigo-500") : "bg-neutral-300"
+          client.is_active ? (isFlagged ? "bg-rose-500" : "bg-[var(--color-ink)]") : "bg-neutral-300"
         }`} />
 
         <div className="p-5 pl-7">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3.5">
-              <div className="avatar avatar-md bg-white/70 text-neutral-600 font-extrabold group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-inner">
+              <div className="w-10 h-10 rounded-[var(--radius-md)] bg-black/5 text-[var(--color-ink)] border border-[var(--color-border)] flex items-center justify-center font-extrabold group-hover:bg-[var(--color-ink)] group-hover:text-white transition-all duration-300">
                 {clientInitials}
               </div>
               <div className="min-w-0">
-                <h3 className="font-extrabold text-neutral-900 text-base leading-tight group-hover:text-primary transition-colors truncate max-w-[140px]" title={client.name}>
+                <h3 className="text-[var(--color-ink)] text-xl transition-colors truncate max-w-[140px]" title={client.name}>
                   {client.name}
                 </h3>
                 <span className={`inline-flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase mt-1 ${
-                  client.is_active ? (isFlagged ? "text-rose-600" : "text-emerald-600") : "text-neutral-400"
+                  client.is_active ? (isFlagged ? "text-rose-600" : "text-emerald-600") : "text-[var(--color-steel)]"
                 }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${client.is_active ? "bg-emerald-500 animate-pulse" : "bg-neutral-300"}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${client.is_active ? "bg-emerald-500 animate-pulse" : "bg-[var(--color-steel)]"}`} />
                   {client.is_active ? "Active" : "Inactive"}
                 </span>
               </div>
@@ -221,14 +222,14 @@ function ClientCard({ client }) {
             )}
           </div>
 
-          <div className="space-y-3 mt-6 border-t border-neutral-200/30 pt-4">
+          <div className="space-y-3 mt-6 border-t border-[var(--color-border)] pt-4">
             {/* Last workout date row */}
             <div className="flex items-center justify-between text-xs">
-              <span className="text-neutral-500 flex items-center gap-1.5 font-medium">
-                <CalendarIcon className="w-3.5 h-3.5 text-neutral-400" />
+              <span className="text-[var(--color-steel)] flex items-center gap-1.5 font-medium">
+                <CalendarIcon className="w-3.5 h-3.5 text-[var(--color-steel)]" />
                 Last Session Completed
               </span>
-              <span className="font-bold text-neutral-700 bg-white/60 px-2 py-0.5 rounded-lg border border-neutral-200/50">
+              <span className="font-bold text-[var(--color-ink)] bg-black/5 px-2 py-0.5 rounded-[var(--radius-sm)] border border-[var(--color-border)]">
                 {client.last_completed_workout || "None yet"}
               </span>
             </div>

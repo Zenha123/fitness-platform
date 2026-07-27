@@ -69,7 +69,7 @@ export default function ReviewCard({ review, isTrainer, onEdit, onDelete }) {
       {/* Body */}
       <div className="p-6 space-y-6">
         <div className="space-y-2">
-          <h4 className="text-sm font-extrabold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+          <h4 className="text-sm text-neutral-500 flex items-center gap-2">
             <span className="w-1.5 h-3 bg-violet-600 rounded-full"></span>
             Overall Progress Summary
           </h4>
@@ -79,7 +79,7 @@ export default function ReviewCard({ review, isTrainer, onEdit, onDelete }) {
         </div>
 
         <div className="space-y-2">
-          <h4 className="text-sm font-extrabold text-amber-600 uppercase tracking-wider flex items-center gap-2">
+          <h4 className="text-sm text-amber-600 flex items-center gap-2">
             <span className="w-1.5 h-3 bg-amber-500 rounded-full"></span>
             Areas to Focus & Improve
           </h4>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
 import { Alert } from "../ui/Alert";
+import { Modal } from "../ui/Modal";
 import { clientsApi } from "../../api/clients";
 
 export default function AddClientModal({ isOpen, onClose, onClientAdded }) {
@@ -10,8 +11,6 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successData, setSuccessData] = useState(null);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,21 +45,27 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }) {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-panel">
-        <div className="modal-header">
-          <h2 className="text-xl font-bold text-neutral-900">
-            {successData ? "Client Added!" : "Add New Client"}
-          </h2>
-          <button 
-            onClick={handleClose}
-            className="p-1 rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
-          >
-            <XIcon className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="modal-body">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={successData ? "Client Added!" : "Add New Client"}
+      footer={
+        successData ? (
+          <Button variant="primary" fullWidth onClick={handleClose}>
+            Done
+          </Button>
+        ) : (
+          <>
+            <Button variant="ghost" onClick={handleClose} disabled={loading}>
+              Cancel
+            </Button>
+            <Button form="add-client-form" type="submit" variant="primary" loading={loading}>
+              Create Client
+            </Button>
+          </>
+        )
+      }
+    >
           {successData ? (
             <div className="text-center py-6">
               <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
@@ -116,34 +121,7 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }) {
               />
             </form>
           )}
-        </div>
-
-        <div className="modal-footer">
-          {successData ? (
-            <Button variant="primary" fullWidth onClick={handleClose}>
-              Done
-            </Button>
-          ) : (
-            <>
-              <Button variant="ghost" onClick={handleClose} disabled={loading}>
-                Cancel
-              </Button>
-              <Button form="add-client-form" type="submit" variant="primary" loading={loading}>
-                Create Client
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function XIcon({ className }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 6L6 18M6 6l12 12" />
-    </svg>
+    </Modal>
   );
 }
 

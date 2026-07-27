@@ -53,23 +53,23 @@ export default function WeightChart({ entries, unit = "kg" }) {
     <div className="space-y-4">
       {/* Mini stats cards above chart */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="glass-panel tint-violet p-4 border-indigo-100/40 hover-lift shadow-sm">
-          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">Start</span>
-          <span className="text-lg font-extrabold text-neutral-800">{initialWeight} <span className="text-xs font-semibold text-neutral-500">{unit}</span></span>
+        <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all">
+          <span className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-wider block mb-0.5">Start</span>
+          <span className="text-lg text-[var(--color-ink)] font-display uppercase tracking-wider">{initialWeight} <span className="text-xs font-semibold text-[var(--color-steel)]">{unit}</span></span>
         </div>
-        <div className="glass-panel tint-sky p-4 border-sky-100/40 hover-lift shadow-sm">
-          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">Current</span>
-          <span className="text-lg font-extrabold text-neutral-800">{currentWeight} <span className="text-xs font-semibold text-neutral-500">{unit}</span></span>
+        <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all">
+          <span className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-wider block mb-0.5">Current</span>
+          <span className="text-lg text-[var(--color-ink)] font-display uppercase tracking-wider">{currentWeight} <span className="text-xs font-semibold text-[var(--color-steel)]">{unit}</span></span>
         </div>
-        <div className="glass-panel tint-emerald p-4 border-emerald-100/40 hover-lift shadow-sm flex flex-col justify-center">
-          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">Net Change</span>
-          <span className={`inline-flex items-center gap-0.5 text-sm font-black px-2.5 py-1 rounded-lg w-fit ${changeColor}`}>
+        <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all flex flex-col justify-center">
+          <span className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-wider block mb-0.5">Net Change</span>
+          <span className={`inline-flex items-center gap-0.5 text-sm font-black px-2.5 py-1 rounded-[var(--radius-sm)] w-fit ${changeColor}`}>
             {netChange > 0 ? "+" : ""}{netChange.toFixed(1)} {unit}
           </span>
         </div>
       </div>
 
-      <div className="glass-panel tint-violet p-5 border-indigo-100/40 shadow-md h-72">
+      <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-xl)] p-5 shadow-sm h-72">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
@@ -99,10 +99,10 @@ export default function WeightChart({ entries, unit = "kg" }) {
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className="bg-neutral-900 text-white px-3 py-2 rounded-lg text-xs shadow-lg border border-neutral-800">
-                      <p className="font-semibold text-neutral-300">{payload[0].payload.rawDate}</p>
+                    <div className="bg-[var(--color-ink)] text-white px-3 py-2 rounded-[var(--radius-sm)] text-xs shadow-lg border border-[var(--color-steel)]/30">
+                      <p className="font-semibold text-[var(--color-steel-light)]">{payload[0].payload.rawDate}</p>
                       <p className="font-bold text-white mt-0.5">
-                        Weight: <span className="text-violet-400">{payload[0].value} {unit}</span>
+                        Weight: <span className="text-white">{payload[0].value} {unit}</span>
                       </p>
                     </div>
                   );

@@ -8,6 +8,7 @@ import { Spinner, PageLoader } from "../components/ui/Spinner";
 import { Input } from "../components/ui/Input";
 import { Alert } from "../components/ui/Alert";
 import TrainerLayout from "../components/layout/TrainerLayout";
+import PageContainer from "../components/layout/PageContainer";
 import WorkoutCalendar from "../components/workouts/WorkoutCalendar";
 import WeightChart from "../components/progress/WeightChart";
 import PhotoTimeline from "../components/progress/PhotoTimeline";
@@ -57,9 +58,8 @@ export default function ClientProfileShell() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
-        <div className="absolute top-[-15%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
-        <div className="glass-panel-elevated max-w-md w-full p-8 text-center">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-neutral-50">
+        <div className="bg-[var(--color-paper)] border border-[var(--color-border)] shadow-sm rounded-[var(--radius-xl)] max-w-md w-full p-8 text-center">
           <Alert variant="danger" className="mb-6">{error}</Alert>
           <Button variant="outline" onClick={() => navigate("/trainer/dashboard")}>
             Back to Dashboard
@@ -80,31 +80,29 @@ export default function ClientProfileShell() {
 
   return (
     <TrainerLayout>
-      <div className="space-y-6 max-w-7xl mx-auto">
+      <PageContainer variant="dashboard" className="space-y-6">
         
         {/* Breadcrumb Header */}
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-neutral-400">
-          <Link to="/trainer/dashboard" className="hover:text-primary transition-colors">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-steel)]">
+          <Link to="/trainer/dashboard" className="hover:text-[var(--color-ink)] transition-colors">
             Roster Database
           </Link>
           <span>/</span>
-          <span className="text-neutral-900 truncate max-w-[150px]">
+          <span className="text-[var(--color-ink)] truncate max-w-[150px]">
             {client.name}
           </span>
         </div>
           
         {/* Client Profile Header card */}
-        <div className="glass-panel-elevated overflow-hidden animate-slide-up relative">
-          <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-indigo-50/20 blur-3xl pointer-events-none" />
-
+        <div className="bg-[var(--color-paper)] border border-[var(--color-border)] shadow-sm rounded-[var(--radius-xl)] overflow-hidden animate-slide-up relative">
           <div className="p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className="w-20 h-20 rounded-2xl bg-indigo-50 text-primary border border-indigo-100/60 flex items-center justify-center text-2xl font-black shadow-inner flex-shrink-0">
+            <div className="w-20 h-20 rounded-[var(--radius-md)] bg-black/5 text-[var(--color-ink)] border border-[var(--color-border)] flex items-center justify-center text-2xl font-black flex-shrink-0">
               {initials}
             </div>
             
             <div className="flex-1 space-y-2">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight leading-tight">
+                <h1 className="text-2xl sm:text-3xl text-[var(--color-ink)] leading-tight">
                   {client.name}
                 </h1>
                 <span className={`badge ${client.is_active ? 'badge-success' : 'badge-neutral'} rounded-md font-extrabold text-[10px]`}>
@@ -134,26 +132,26 @@ export default function ClientProfileShell() {
         {/* Navigation Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up" style={{ animationDelay: "100ms" }}>
           {[
-            { id: "overview", label: "Overview", icon: OverviewIcon, tint: "tint-violet", color: "text-indigo-600", bg: "bg-indigo-100/50", border: "border-indigo-100/50" },
-            { id: "workouts", label: "Schedule", icon: CalendarIcon, tint: "tint-sky", color: "text-sky-600", bg: "bg-sky-100/50", border: "border-sky-100/50" },
-            { id: "progress", label: "Transformation", icon: ProgressIcon, tint: "tint-orange", color: "text-orange-600", bg: "bg-orange-100/50", border: "border-orange-100/50" },
-            { id: "reviews", label: "Coaching Notes", icon: ReviewIcon, tint: "tint-emerald", color: "text-emerald-600", bg: "bg-emerald-100/50", border: "border-emerald-100/50" },
+            { id: "overview", label: "Overview", icon: OverviewIcon },
+            { id: "workouts", label: "Schedule", icon: CalendarIcon },
+            { id: "progress", label: "Transformation", icon: ProgressIcon },
+            { id: "reviews", label: "Coaching Notes", icon: ReviewIcon },
           ].map(tab => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`glass-panel p-5 flex flex-col items-center justify-center text-center gap-3 transition-all duration-200 ${
+                className={`bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-5 flex flex-col items-center justify-center text-center gap-3 transition-all duration-200 ${
                   isActive 
-                    ? `${tab.tint} ${tab.border} ring-1 ring-black/5 shadow-md scale-[1.02]` 
-                    : "hover-lift border-neutral-200/60 opacity-80 hover:opacity-100 hover:bg-white/60"
+                    ? `shadow-sm scale-[1.02] border-[var(--color-ink)]` 
+                    : "hover-lift hover:bg-black/5"
                 }`}
               >
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isActive ? tab.bg + ' ' + tab.color : 'bg-neutral-100 text-neutral-500'}`}>
+                <div className={`w-12 h-12 rounded-[var(--radius-md)] flex items-center justify-center ${isActive ? 'bg-[var(--color-ink)] text-white' : 'bg-black/5 text-[var(--color-steel)]'}`}>
                   <tab.icon className="w-6 h-6" />
                 </div>
-                <span className={`text-sm font-extrabold ${isActive ? 'text-neutral-900' : 'text-neutral-500'}`}>
+                <span className={`text-sm font-extrabold ${isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-steel)]'}`}>
                   {tab.label}
                 </span>
               </button>
@@ -167,7 +165,7 @@ export default function ClientProfileShell() {
             <OverviewTab client={client} onUpdate={handleUpdate} />
           )}
           {activeTab === "workouts" && (
-            <div className="glass-panel p-6">
+            <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-6">
               <WorkoutCalendar clientId={client.id} />
             </div>
           )}
@@ -179,7 +177,7 @@ export default function ClientProfileShell() {
           )}
         </div>
 
-      </div>
+      </PageContainer>
     </TrainerLayout>
   );
 }
@@ -216,9 +214,9 @@ function OverviewTab({ client, onUpdate }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        <div className="glass-panel">
-          <div className="border-b border-neutral-100 p-5 flex items-center justify-between">
-            <h3 className="font-extrabold text-neutral-900 text-base tracking-tight">Account Configuration</h3>
+        <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)]">
+          <div className="border-b border-[var(--color-border)] p-5 flex items-center justify-between">
+            <h3 className="text-[var(--color-ink)] text-base">Account Configuration</h3>
             {!isEditing && (
               <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                 Modify Details
@@ -300,9 +298,9 @@ function OverviewTab({ client, onUpdate }) {
       </div>
       
       <div className="space-y-6">
-        <div className="glass-panel tint-violet border-indigo-100/50 p-6 shadow-sm hover-lift">
-          <h3 className="font-extrabold text-primary mb-2">Coach Notes</h3>
-          <p className="text-xs text-neutral-500 font-bold leading-relaxed">
+        <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-6 shadow-sm hover-lift">
+          <h3 className="text-[var(--color-ink)] mb-2">Coach Notes</h3>
+          <p className="text-xs text-[var(--color-steel)] font-medium leading-relaxed">
             Use the layout tabs above to check calendar attendance records, browse progress check-ins, compare timeline logs, and post feedback review notes for {client.name}.
           </p>
         </div>
@@ -370,21 +368,21 @@ function ProgressTab({ clientId, unit }) {
       {error && <Alert variant="danger">{error}</Alert>}
 
       {/* Weight Trend */}
-      <div className="glass-panel p-6 space-y-4">
-        <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">Bodyweight Progression</h3>
+      <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-6 space-y-4 shadow-sm">
+        <h3 className="text-base text-[var(--color-ink)]">Bodyweight Progression</h3>
         <WeightChart entries={entries} unit={unit} />
       </div>
 
       {/* Photo Journey */}
-      <div className="glass-panel p-6 space-y-4">
-        <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">Timeline Photos</h3>
+      <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-6 space-y-4 shadow-sm">
+        <h3 className="text-base text-[var(--color-ink)]">Timeline Photos</h3>
         <PhotoTimeline entries={entries} unit={unit} />
       </div>
 
       {/* Strength Analytics */}
-      <div className="glass-panel p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-4">
-          <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">Strength Benchmarks</h3>
+      <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-6 space-y-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--color-border)] pb-4">
+          <h3 className="text-base text-[var(--color-ink)]">Strength Benchmarks</h3>
           
           {exercises.length > 0 && (
             <select
@@ -403,9 +401,9 @@ function ProgressTab({ clientId, unit }) {
         </div>
 
         {exercises.length === 0 ? (
-          <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-neutral-200 rounded-2xl bg-neutral-50/50 p-6 text-center">
-            <p className="text-sm text-neutral-400 font-bold">No exercise records logged yet.</p>
-            <p className="text-xs text-neutral-400 font-medium mt-1">Strength progression charts will show once the client logs workouts.</p>
+          <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-[var(--color-border)] rounded-[var(--radius-xl)] bg-black/5 p-6 text-center">
+            <p className="text-sm text-[var(--color-steel)] font-bold">No exercise records logged yet.</p>
+            <p className="text-xs text-[var(--color-steel)] font-medium mt-1">Strength progression charts will show once the client logs workouts.</p>
           </div>
         ) : loadingChart ? (
           <div className="h-64 flex items-center justify-center"><Spinner /></div>
@@ -485,10 +483,10 @@ function ReviewsTab({ clientId, clientName }) {
     <div className="space-y-6">
       {error && <Alert variant="danger">{error}</Alert>}
 
-      <div className="flex justify-between items-center glass-panel tint-violet p-5 border-indigo-100/50 shadow-sm">
+      <div className="flex justify-between items-center bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-5 shadow-sm">
         <div>
-          <h3 className="font-extrabold text-neutral-900 tracking-tight">Coaching Log</h3>
-          <p className="text-xs text-neutral-500 font-bold mt-0.5">
+          <h3 className="text-[var(--color-ink)]">Coaching Log</h3>
+          <p className="text-xs text-[var(--color-steel)] font-medium mt-0.5">
             Post summaries, check-in updates, and focal correction advice.
           </p>
         </div>
@@ -507,7 +505,7 @@ function ReviewsTab({ clientId, clientName }) {
       </div>
 
       {showForm && (
-        <div className="glass-panel p-5 animate-slide-up">
+        <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-5 animate-slide-up shadow-sm">
           <ReviewForm
             clientName={clientName}
             initialData={editingReview}
@@ -522,13 +520,13 @@ function ReviewsTab({ clientId, clientName }) {
 
       <div className="space-y-6">
         {reviews.length === 0 ? (
-          <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-neutral-200 rounded-2xl bg-neutral-50/50 p-6 text-center">
-            <span className="text-sm text-neutral-400 font-bold">No feedback logs yet.</span>
-            <span className="text-xs text-neutral-400 mt-1 font-semibold">Post a review note to share logs with {clientName}.</span>
+          <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-[var(--color-border)] rounded-[var(--radius-xl)] bg-black/5 p-6 text-center">
+            <span className="text-sm text-[var(--color-steel)] font-bold">No feedback logs yet.</span>
+            <span className="text-xs text-[var(--color-steel)] mt-1 font-medium">Post a review note to share logs with {clientName}.</span>
           </div>
         ) : (
           reviews.map((review) => (
-            <div key={review.id} className="glass-panel hover-lift overflow-hidden">
+            <div key={review.id} className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] hover-lift overflow-hidden shadow-sm">
               <ReviewCard
                 review={review}
                 isTrainer={true}

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AuthenticatedImage from "../ui/AuthenticatedImage";
 import { Button } from "../ui/Button";
+import { Modal } from "../ui/Modal";
 
 function getDateDifference(d1, d2) {
   const date1 = new Date(d1);
@@ -84,7 +85,7 @@ export default function PhotoTimeline({ entries, unit = "kg" }) {
       {/* Top action bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
         <div>
-          <h3 className="font-bold text-neutral-900">Photo Journey</h3>
+          <h3 className="text-neutral-900">Photo Journey</h3>
           <p className="text-xs text-neutral-400">
             {selectedIds.length} of 2 photos selected for side-by-side comparison
           </p>
@@ -120,8 +121,8 @@ export default function PhotoTimeline({ entries, unit = "kg" }) {
               onClick={() => toggleSelect(entry.id)}
               className={`group cursor-pointer bg-white rounded-xl border overflow-hidden shadow-sm transition-all duration-200 relative ${
                 isSelected
-                  ? "border-violet-600 ring-2 ring-violet-100"
-                  : "border-neutral-200 hover:border-neutral-300"
+                  ? "border-[var(--color-ink)] ring-2 ring-[var(--color-ink)]/20"
+                  : "border-neutral-200 hover:border-[var(--color-steel)]"
               }`}
             >
               <div className="aspect-square w-full relative bg-neutral-50 overflow-hidden">
@@ -136,7 +137,7 @@ export default function PhotoTimeline({ entries, unit = "kg" }) {
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${
                       isSelected
-                        ? "bg-violet-600 border-violet-600 text-white"
+                        ? "bg-[var(--color-ink)] border-[var(--color-ink)] text-white"
                         : "bg-black/20 border-white/80 text-transparent"
                     }`}
                   >
@@ -166,104 +167,90 @@ export default function PhotoTimeline({ entries, unit = "kg" }) {
 
       {/* Compare Modal */}
       {compareMode && photo1 && photo2 && (
-        <div className="fixed inset-0 z-50 bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+        <Modal
+          isOpen={compareMode}
+          onClose={closeCompare}
+          title="Side-by-Side Comparison"
+          maxWidth="max-w-4xl"
+          footer={
+            <Button variant="secondary" onClick={closeCompare}>
+              Close Comparison
+            </Button>
+          }
+        >
+          <div className="space-y-6">
+            <p className="text-sm text-neutral-500 font-medium mb-4">
+              Time difference: <span className="text-[var(--color-ink)] font-bold">{timeDiff}</span>
+            </p>
+
+            {/* Diff card */}
+            <div className="bg-[var(--color-paper)] border border-[var(--color-border)] p-4 rounded-xl flex items-center justify-around text-center">
               <div>
-                <h3 className="font-extrabold text-neutral-900 text-lg">Side-by-Side Comparison</h3>
-                <p className="text-xs text-neutral-400 font-semibold mt-0.5">
-                  Time difference: <span className="text-violet-600 font-bold">{timeDiff}</span>
+                <span className="text-[10px] uppercase font-bold text-[var(--color-steel)] tracking-wider">Before</span>
+                <p className="text-sm font-extrabold text-[var(--color-ink)] mt-0.5">
+                  {new Date(photo1.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </p>
+                <p className="text-lg font-black text-[var(--color-ink)]">{photo1.weight_display} {unit}</p>
+              </div>
+              <div className="w-px h-10 bg-[var(--color-border)]"></div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[var(--color-steel)] tracking-wider">Weight Diff</span>
+                <p className={`text-xl font-black mt-1 ${weightDiff < 0 ? "text-emerald-600" : weightDiff > 0 ? "text-[var(--color-signal)]" : "text-neutral-500"}`}>
+                  {weightDiff > 0 ? "+" : ""}{weightDiff.toFixed(1)} {unit}
                 </p>
               </div>
-              <button
-                onClick={closeCompare}
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-neutral-200 text-neutral-500 hover:text-neutral-800 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 overflow-y-auto flex-1 space-y-6">
-              {/* Diff card */}
-              <div className="bg-violet-50 border border-violet-100 p-4 rounded-xl flex items-center justify-around text-center">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-violet-400 tracking-wider">Before</span>
-                  <p className="text-sm font-extrabold text-neutral-800 mt-0.5">
-                    {new Date(photo1.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                  </p>
-                  <p className="text-lg font-black text-neutral-900">{photo1.weight_display} {unit}</p>
-                </div>
-                <div className="w-px h-10 bg-violet-200"></div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-violet-400 tracking-wider">Weight Diff</span>
-                  <p className={`text-xl font-black mt-1 ${weightDiff < 0 ? "text-emerald-600" : weightDiff > 0 ? "text-rose-600" : "text-neutral-500"}`}>
-                    {weightDiff > 0 ? "+" : ""}{weightDiff.toFixed(1)} {unit}
-                  </p>
-                </div>
-                <div className="w-px h-10 bg-violet-200"></div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-violet-400 tracking-wider">After</span>
-                  <p className="text-sm font-extrabold text-neutral-800 mt-0.5">
-                    {new Date(photo2.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                  </p>
-                  <p className="text-lg font-black text-neutral-900">{photo2.weight_display} {unit}</p>
-                </div>
-              </div>
-
-              {/* Side-by-Side Images */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="aspect-[3/4] sm:aspect-square w-full rounded-xl overflow-hidden border border-neutral-200 bg-neutral-50 shadow-sm relative">
-                    <AuthenticatedImage
-                      src={photo1.photo_url}
-                      alt="Before progress photo"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-xs text-white px-2 py-0.5 rounded text-[10px] font-bold">
-                      Before
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs font-bold text-neutral-800">
-                      {new Date(photo1.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                    </p>
-                    <p className="text-xs text-neutral-400 font-semibold">{photo1.weight_display} {unit}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="aspect-[3/4] sm:aspect-square w-full rounded-xl overflow-hidden border border-neutral-200 bg-neutral-50 shadow-sm relative">
-                    <AuthenticatedImage
-                      src={photo2.photo_url}
-                      alt="After progress photo"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-2 left-2 bg-violet-600 text-white px-2 py-0.5 rounded text-[10px] font-bold">
-                      After
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs font-bold text-neutral-800">
-                      {new Date(photo2.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                    </p>
-                    <p className="text-xs text-neutral-400 font-semibold">{photo2.weight_display} {unit}</p>
-                  </div>
-                </div>
+              <div className="w-px h-10 bg-[var(--color-border)]"></div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[var(--color-steel)] tracking-wider">After</span>
+                <p className="text-sm font-extrabold text-[var(--color-ink)] mt-0.5">
+                  {new Date(photo2.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </p>
+                <p className="text-lg font-black text-[var(--color-ink)]">{photo2.weight_display} {unit}</p>
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-neutral-200 bg-neutral-50 flex justify-end">
-              <Button variant="outline" size="sm" onClick={closeCompare}>
-                Close Comparison
-              </Button>
+            {/* Side-by-Side Images */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="aspect-[3/4] sm:aspect-square w-full rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-paper)] shadow-sm relative">
+                  <AuthenticatedImage
+                    src={photo1.photo_url}
+                    alt="Before progress photo"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-xs text-white px-2 py-0.5 rounded-[var(--radius-sm)] text-[10px] font-bold">
+                    Before
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-bold text-[var(--color-ink)]">
+                    {new Date(photo1.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                  </p>
+                  <p className="text-xs text-[var(--color-steel)] font-semibold">{photo1.weight_display} {unit}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="aspect-[3/4] sm:aspect-square w-full rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-paper)] shadow-sm relative">
+                  <AuthenticatedImage
+                    src={photo2.photo_url}
+                    alt="After progress photo"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute bottom-2 left-2 bg-[var(--color-ink)] text-white px-2 py-0.5 rounded-[var(--radius-sm)] text-[10px] font-bold">
+                    After
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-bold text-[var(--color-ink)]">
+                    {new Date(photo2.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                  </p>
+                  <p className="text-xs text-[var(--color-steel)] font-semibold">{photo2.weight_display} {unit}</p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
 import { Alert } from "../components/ui/Alert";
+import PageContainer from "../components/layout/PageContainer";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -38,13 +39,13 @@ export default function LoginPage() {
       <div className="absolute top-[20%] right-[15%] w-[20rem] h-[20rem] rounded-full bg-sky-400/10 blur-[60px] pointer-events-none animate-bloom" style={{ animationDelay: "400ms" }} />
       
       {/* Centered Auth Card */}
-      <div className="w-full max-w-[440px] relative z-10 animate-slide-up">
+      <PageContainer variant="form" className="relative z-10 animate-slide-up">
         <div className="glass-panel-elevated p-10 sm:p-12 shadow-2xl border-white/80">
           <div className="flex flex-col items-center text-center mb-10">
             <div className="w-14 h-14 rounded-2xl hero-gradient flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30">
               <BoltIcon className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-3xl font-extrabold text-neutral-900 tracking-tight mb-2">
+            <h1 className="text-3xl text-neutral-900 tracking-tight mb-2">
               FitCoach
             </h1>
             <p className="text-neutral-500 text-sm font-medium">
@@ -120,7 +121,7 @@ export default function LoginPage() {
         <p className="text-center text-xs font-semibold text-neutral-400 mt-8">
           © {new Date().getFullYear()} FitCoach Platform
         </p>
-      </div>
+      </PageContainer>
     </div>
   );
 }

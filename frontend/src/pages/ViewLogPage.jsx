@@ -7,6 +7,7 @@ import { Alert } from "../components/ui/Alert";
 import { PageLoader } from "../components/ui/Spinner";
 import TrainerLayout from "../components/layout/TrainerLayout";
 import ClientLayout from "../components/layout/ClientLayout";
+import PageContainer from "../components/layout/PageContainer";
 
 export default function ViewLogPage() {
   const { logId } = useParams();
@@ -56,26 +57,26 @@ export default function ViewLogPage() {
       : 0;
 
     return (
-      <div className="max-w-3xl mx-auto space-y-6">
+      <PageContainer variant="form" className="space-y-6">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-500 hover:text-neutral-900 transition-colors"
+          className="inline-flex items-center gap-2 p-2 -ml-2 rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-steel)] hover:text-[var(--color-ink)] hover:bg-black/5 transition-colors"
         >
           <ArrowLeftIcon className="w-4 h-4" />
           Back
         </button>
         {/* ── Log Header ── */}
-        <div className="glass-panel tint-sky border-sky-100/50 overflow-hidden shadow-md">
+        <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] overflow-hidden shadow-sm">
           <div className="p-6">
             <div className="flex items-start justify-between gap-4 mb-5">
               <div>
-                <h1 className="font-extrabold text-2xl text-neutral-900 leading-tight">
+                <h1 className="text-2xl text-[var(--color-ink)] leading-tight">
                   {log.plan_title || "Ad-hoc Workout"}
                 </h1>
                 {!isTrainer && (
                   <Link
                     to={`/client/log-workout?logId=${log.id}`}
-                    className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+                    className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-[var(--color-ink)] hover:text-[var(--color-ink)]/70 transition-colors uppercase tracking-wider"
                   >
                     <EditIcon className="w-3.5 h-3.5" />
                     Edit this log
@@ -97,18 +98,18 @@ export default function ViewLogPage() {
 
             {/* Meta grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="bg-white/60 rounded-xl p-3 border border-sky-100/30">
-                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">Date</p>
-                <p className="font-bold text-neutral-800 text-sm">{log.date}</p>
+              <div className="bg-white rounded-[var(--radius-md)] p-3 border border-[var(--color-border)]">
+                <p className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-0.5">Date</p>
+                <p className="font-bold text-[var(--color-ink)] text-sm">{log.date}</p>
               </div>
-              <div className="bg-white/60 rounded-xl p-3 border border-sky-100/30">
-                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">Logged At</p>
-                <p className="font-bold text-neutral-800 text-sm">{new Date(log.logged_at).toLocaleString()}</p>
+              <div className="bg-white rounded-[var(--radius-md)] p-3 border border-[var(--color-border)]">
+                <p className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-0.5">Logged At</p>
+                <p className="font-bold text-[var(--color-ink)] text-sm">{new Date(log.logged_at).toLocaleString()}</p>
               </div>
               {totalVolume > 0 && (
-                <div className="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-xl p-3 border border-indigo-100 col-span-2 sm:col-span-1">
-                  <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-0.5">Total Volume</p>
-                  <p className="font-extrabold text-indigo-700 text-sm">{totalVolume.toFixed(0)} kg</p>
+                <div className="bg-black/5 rounded-[var(--radius-md)] p-3 border border-[var(--color-border)] col-span-2 sm:col-span-1">
+                  <p className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-0.5">Total Volume</p>
+                  <p className="font-extrabold text-[var(--color-ink)] text-sm">{totalVolume.toFixed(0)} kg</p>
                 </div>
               )}
             </div>
@@ -117,33 +118,33 @@ export default function ViewLogPage() {
 
         {/* ── Exercises ── */}
         <div>
-          <h2 className="text-lg font-extrabold text-neutral-900 mb-4 flex items-center gap-2">
-            <DumbbellIcon className="w-5 h-5 text-indigo-500" />
+          <h2 className="text-lg text-[var(--color-ink)] mb-4 flex items-center gap-2">
+            <DumbbellIcon className="w-5 h-5 text-[var(--color-ink)]" />
             Exercises Performed
-            <span className="text-sm font-semibold text-neutral-400 ml-1">({log.entries?.length || 0})</span>
+            <span className="text-sm font-semibold text-[var(--color-steel)] ml-1">({log.entries?.length || 0})</span>
           </h2>
 
           {!log.entries || log.entries.length === 0 ? (
-            <div className="bg-white border border-neutral-200 rounded-2xl p-8 text-center text-neutral-500 italic">
+            <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-xl)] p-8 text-center text-[var(--color-steel)] italic font-medium">
               No exercises logged.
             </div>
           ) : (
             <div className="space-y-4">
               {log.entries.map((entry, idx) => (
-                <div key={idx} className="glass-panel tint-violet border-indigo-150/30 overflow-hidden shadow-sm hover-lift">
+                <div key={idx} className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] overflow-hidden shadow-sm hover-lift">
                   <div className="flex">
-                    <div className="w-1 flex-shrink-0 bg-gradient-to-b from-emerald-400 to-teal-500 rounded-l-2xl" />
+                    <div className="w-1 flex-shrink-0 bg-[var(--color-ink)]" />
                     <div className="flex-1 p-5">
                       {/* Exercise header */}
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs font-black text-emerald-700">#{idx + 1}</span>
+                          <div className="w-8 h-8 rounded-[var(--radius-md)] bg-black/5 border border-[var(--color-border)] flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-black text-[var(--color-ink)]">#{idx + 1}</span>
                           </div>
                           <div>
-                            <h3 className="font-extrabold text-neutral-900 text-base">{entry.exercise_name}</h3>
+                            <h3 className="text-[var(--color-ink)] text-base">{entry.exercise_name}</h3>
                             {entry.exercise_category && (
-                              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                              <span className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-wider">
                                 {entry.exercise_category}
                               </span>
                             )}
@@ -154,7 +155,7 @@ export default function ViewLogPage() {
                             href={entry.exercise_demo_link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-indigo-500 to-violet-500 px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[var(--color-ink)] px-2.5 py-1.5 rounded-[var(--radius-md)] shadow-sm hover:bg-[var(--color-ink)]/90 transition-all"
                           >
                             <VideoIcon className="w-3.5 h-3.5" />
                             Demo
@@ -164,17 +165,17 @@ export default function ViewLogPage() {
 
                       {/* Stats */}
                       <div className="grid grid-cols-3 gap-3">
-                        <div className="bg-white/60 rounded-xl p-3 text-center border border-indigo-100/30">
-                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Sets</p>
-                          <p className="text-2xl font-extrabold text-neutral-900">{entry.actual_sets}</p>
+                        <div className="bg-white rounded-[var(--radius-md)] p-3 text-center border border-[var(--color-border)]">
+                          <p className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Sets</p>
+                          <p className="text-2xl font-extrabold text-[var(--color-ink)]">{entry.actual_sets}</p>
                         </div>
-                        <div className="bg-white/60 rounded-xl p-3 text-center border border-indigo-100/30">
-                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Reps</p>
-                          <p className="text-2xl font-extrabold text-neutral-900">{entry.actual_reps || "—"}</p>
+                        <div className="bg-white rounded-[var(--radius-md)] p-3 text-center border border-[var(--color-border)]">
+                          <p className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Reps</p>
+                          <p className="text-2xl font-extrabold text-[var(--color-ink)]">{entry.actual_reps || "—"}</p>
                         </div>
-                        <div className="bg-white/60 rounded-xl p-3 text-center border border-indigo-100/30">
-                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Weight</p>
-                          <p className="text-2xl font-extrabold text-neutral-900">
+                        <div className="bg-white rounded-[var(--radius-md)] p-3 text-center border border-[var(--color-border)]">
+                          <p className="text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Weight</p>
+                          <p className="text-2xl font-extrabold text-[var(--color-ink)]">
                             {entry.actual_weight_kg ? `${entry.actual_weight_kg}` : "BW"}
                           </p>
                         </div>
@@ -182,7 +183,7 @@ export default function ViewLogPage() {
 
                       {/* Notes */}
                       {entry.notes && (
-                        <div className="mt-3 glass-panel tint-amber border-amber-200/50 px-4 py-3 text-sm text-amber-800">
+                        <div className="mt-3 bg-amber-50 border border-amber-200 rounded-[var(--radius-md)] px-4 py-3 text-sm text-amber-800">
                           <span className="font-bold">Notes: </span>{entry.notes}
                         </div>
                       )}
@@ -195,17 +196,17 @@ export default function ViewLogPage() {
         </div>
 
         {log.notes && (
-          <div className="glass-panel tint-sky border-sky-100/50 p-5 shadow-md">
-            <h2 className="text-base font-extrabold text-neutral-900 mb-3 flex items-center gap-2">
-              <NotesIcon className="w-4 h-4 text-indigo-400" />
+          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-5 shadow-sm">
+            <h2 className="text-base text-[var(--color-ink)] mb-3 flex items-center gap-2">
+              <NotesIcon className="w-4 h-4 text-[var(--color-ink)]" />
               Session Notes
             </h2>
-            <p className="text-neutral-700 text-sm whitespace-pre-wrap leading-relaxed">
+            <p className="text-[var(--color-ink)] text-sm whitespace-pre-wrap leading-relaxed font-medium">
               {log.notes}
             </p>
           </div>
         )}
-      </div>
+      </PageContainer>
     );
   };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import TrainerLayout from "../components/layout/TrainerLayout";
+import PageContainer from "../components/layout/PageContainer";
 import { Button } from "../components/ui/Button";
 import { Spinner } from "../components/ui/Spinner";
 import { Alert } from "../components/ui/Alert";
@@ -13,23 +14,23 @@ const CATEGORIES = [
 ];
 
 const CATEGORY_COLORS = {
-  "Chest":     { bg: "bg-rose-50",    text: "text-rose-700",    border: "border-rose-200" },
-  "Back":      { bg: "bg-sky-50",     text: "text-sky-700",     border: "border-sky-200"  },
-  "Shoulders": { bg: "bg-violet-50",  text: "text-violet-700",  border: "border-violet-200" },
-  "Biceps":    { bg: "bg-orange-50",  text: "text-orange-700",  border: "border-orange-200" },
-  "Triceps":   { bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-200" },
-  "Legs":      { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
-  "Glutes":    { bg: "bg-pink-50",    text: "text-pink-700",    border: "border-pink-200" },
-  "Core":      { bg: "bg-indigo-50",  text: "text-indigo-700",  border: "border-indigo-200" },
-  "Cardio":    { bg: "bg-red-50",     text: "text-red-700",     border: "border-red-200" },
-  "Full Body": { bg: "bg-purple-50",  text: "text-purple-700",  border: "border-purple-200" },
-  "Mobility":  { bg: "bg-teal-50",    text: "text-teal-700",    border: "border-teal-200" },
-  "Stretching":{ bg: "bg-cyan-50",    text: "text-cyan-700",    border: "border-cyan-200" },
-  "Custom":    { bg: "bg-neutral-100",text: "text-neutral-700", border: "border-neutral-200" },
+  "Chest":     { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Back":      { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Shoulders": { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Biceps":    { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Triceps":   { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Legs":      { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Glutes":    { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Core":      { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Cardio":    { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Full Body": { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Mobility":  { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Stretching":{ bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
+  "Custom":    { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" },
 };
 
 function getCategoryStyle(category) {
-  return CATEGORY_COLORS[category] || { bg: "bg-neutral-100", text: "text-neutral-700", border: "border-neutral-200" };
+  return CATEGORY_COLORS[category] || { bg: "bg-black/5", text: "text-[var(--color-steel)]", border: "border-[var(--color-border)]" };
 }
 
 export default function ExerciseLibraryPage() {
@@ -97,48 +98,39 @@ export default function ExerciseLibraryPage() {
 
   return (
     <TrainerLayout>
+      <PageContainer variant="dashboard">
       {/* ── Hero Banner ── */}
-      <div className="relative overflow-hidden rounded-2xl mb-8"
-        style={{
-          background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #4338ca 100%)",
-        }}
-      >
-        {/* Ambient blobs */}
-        <div className="absolute -top-10 -right-10 w-56 h-56 rounded-full opacity-20"
-          style={{ background: "radial-gradient(circle, #a78bfa 0%, transparent 70%)" }} />
-        <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-15"
-          style={{ background: "radial-gradient(circle, #818cf8 0%, transparent 70%)" }} />
-
+      <div className="relative overflow-hidden rounded-[var(--radius-2xl)] mb-8 bg-[var(--color-ink)]">
         <div className="relative z-10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+              <div className="w-10 h-10 rounded-[var(--radius-md)] bg-white/20 backdrop-blur flex items-center justify-center">
                 <DumbbellIcon className="w-5 h-5 text-white" />
               </div>
               <span className="text-white/70 text-sm font-semibold uppercase tracking-wider">Exercise Library</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+            <h1 className="text-2xl sm:text-3xl text-white leading-tight">
               Your Movement Database
             </h1>
-            <p className="text-indigo-200 mt-1 text-sm max-w-md">
+            <p className="text-white/70 mt-1 text-sm max-w-md font-medium">
               Build and manage your private collection of exercises. Use them to create powerful workout plans for your clients.
             </p>
             <div className="flex flex-wrap items-center gap-4 mt-4">
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur rounded-xl px-3 py-1.5">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur rounded-[var(--radius-md)] px-3 py-1.5 border border-white/10">
                 <span className="text-white font-extrabold text-lg">{exercises.length}</span>
-                <span className="text-indigo-200 text-xs">Total Exercises</span>
+                <span className="text-white/70 text-xs">Total Exercises</span>
               </div>
               {withVideo > 0 && (
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur rounded-xl px-3 py-1.5">
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur rounded-[var(--radius-md)] px-3 py-1.5 border border-white/10">
                   <span className="text-white font-extrabold text-lg">{withVideo}</span>
-                  <span className="text-indigo-200 text-xs">With Video Demo</span>
+                  <span className="text-white/70 text-xs">With Video Demo</span>
                 </div>
               )}
             </div>
           </div>
           <button
             onClick={openAddModal}
-            className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-3 bg-white text-indigo-700 font-bold rounded-xl shadow-lg hover:bg-indigo-50 transition-all hover:-translate-y-0.5 text-sm"
+            className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-3 bg-[var(--color-signal)] text-white font-bold rounded-[var(--radius-md)] shadow-sm hover:bg-[var(--color-signal)]/90 transition-all hover:-translate-y-0.5 text-sm"
           >
             <PlusIcon className="w-4 h-4" />
             Add Exercise
@@ -147,19 +139,19 @@ export default function ExerciseLibraryPage() {
       </div>
 
       {/* ── Search + Filter Bar ── */}
-      <div className="glass-panel tint-sky border-sky-100/50 mb-6 overflow-hidden">
-        <div className="px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4 border-b border-sky-100/50">
+      <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm mb-6 overflow-hidden">
+        <div className="px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4 border-b border-[var(--color-border)]">
           <div className="relative flex-1">
             <SearchIcon className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
             <input
               type="text"
               placeholder="Search exercises by name…"
-              className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 border border-[var(--color-border)] rounded-[var(--radius-md)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all text-[var(--color-ink)]"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="text-xs font-bold text-neutral-400 uppercase tracking-widest whitespace-nowrap">
+          <div className="text-xs font-bold text-[var(--color-steel)] uppercase tracking-widest whitespace-nowrap">
             {filteredExercises.length} {filteredExercises.length === 1 ? "Result" : "Results"}
           </div>
         </div>
@@ -170,10 +162,10 @@ export default function ExerciseLibraryPage() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 rounded-[var(--radius-md)] text-xs font-bold whitespace-nowrap transition-all border ${
                 activeCategory === cat
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 scale-105"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                  ? "bg-[var(--color-ink)] text-white border-[var(--color-ink)] shadow-sm scale-105"
+                  : "bg-black/5 text-[var(--color-steel)] border-[var(--color-border)] hover:bg-black/10 hover:text-[var(--color-ink)]"
               }`}
             >
               {cat}
@@ -191,17 +183,17 @@ export default function ExerciseLibraryPage() {
         </div>
       ) : exercises.length === 0 ? (
         /* Empty state */
-        <div className="bg-white border-2 border-dashed border-neutral-200 rounded-2xl flex flex-col items-center justify-center py-20 text-center px-6">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center mb-5 shadow-inner">
-            <DumbbellIcon className="w-10 h-10 text-violet-400" />
+        <div className="bg-black/5 border-2 border-dashed border-[var(--color-border)] rounded-[var(--radius-xl)] flex flex-col items-center justify-center py-20 text-center px-6">
+          <div className="w-20 h-20 rounded-[var(--radius-md)] bg-white border border-[var(--color-border)] flex items-center justify-center mb-5 shadow-sm">
+            <DumbbellIcon className="w-10 h-10 text-[var(--color-steel)]" />
           </div>
-          <h3 className="text-xl font-bold text-neutral-900 mb-2">Your library is empty</h3>
-          <p className="text-sm text-neutral-500 max-w-sm leading-relaxed mb-6">
+          <h3 className="text-xl text-[var(--color-ink)] mb-2">Your library is empty</h3>
+          <p className="text-sm text-[var(--color-steel)] max-w-sm leading-relaxed mb-6 font-medium">
             Start building your private database of exercises. You'll use these to construct powerful workout plans for your clients.
           </p>
           <button
             onClick={openAddModal}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-ink)] text-white text-sm font-bold rounded-[var(--radius-md)] hover:bg-[var(--color-ink)]/90 transition-all shadow-sm"
           >
             <PlusIcon className="w-4 h-4" />
             Add your first exercise
@@ -228,30 +220,29 @@ export default function ExerciseLibraryPage() {
             return (
               <div
                 key={exercise.id}
-                className="group glass-panel tint-violet border-indigo-150/30 hover-lift overflow-hidden"
+                className="group bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm hover-lift overflow-hidden"
               >
-
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0 pr-2">
-                      <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] uppercase font-black tracking-widest border ${catStyle.bg} ${catStyle.text} ${catStyle.border} mb-2`}>
+                      <span className={`inline-block px-2 py-0.5 rounded-[var(--radius-sm)] text-[10px] uppercase font-black tracking-widest border ${catStyle.bg} ${catStyle.text} ${catStyle.border} mb-2`}>
                         {exercise.category}
                       </span>
-                      <h3 className="font-bold text-neutral-900 text-base leading-tight truncate">
+                      <h3 className="text-[var(--color-ink)] text-base leading-tight truncate">
                         {exercise.name}
                       </h3>
                     </div>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                       <button
                         onClick={() => openEditModal(exercise)}
-                        className="p-1.5 text-neutral-400 hover:text-indigo-600 transition-colors rounded-lg hover:bg-indigo-50"
+                        className="p-1.5 text-[var(--color-steel)] hover:text-[var(--color-ink)] transition-colors rounded-[var(--radius-sm)] hover:bg-black/5"
                         title="Edit Exercise"
                       >
                         <EditIcon className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(exercise.id)}
-                        className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors rounded-lg hover:bg-rose-50"
+                        className="p-1.5 text-[var(--color-steel)] hover:text-rose-600 transition-colors rounded-[var(--radius-sm)] hover:bg-rose-50"
                         title="Delete Exercise"
                       >
                         <TrashIcon className="w-4 h-4" />
@@ -260,18 +251,18 @@ export default function ExerciseLibraryPage() {
                   </div>
 
                   {exercise.notes && (
-                    <p className="text-xs text-neutral-500 line-clamp-2 leading-relaxed mb-3">
+                    <p className="text-xs text-[var(--color-steel)] font-medium line-clamp-2 leading-relaxed mb-3">
                       {exercise.notes}
                     </p>
                   )}
 
                   {exercise.demo_link && (
-                    <div className="mt-2 pt-3 border-t border-neutral-100">
+                    <div className="mt-2 pt-3 border-t border-[var(--color-border)]">
                       <a
                         href={exercise.demo_link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-xs font-bold text-white bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 px-3 py-1.5 rounded-lg transition-all shadow-sm shadow-indigo-200"
+                        className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[var(--color-ink)] hover:bg-[var(--color-ink)]/90 px-3 py-1.5 rounded-[var(--radius-md)] transition-all shadow-sm"
                       >
                         <VideoIcon className="w-3.5 h-3.5" />
                         Watch Demo
@@ -291,6 +282,7 @@ export default function ExerciseLibraryPage() {
         onSave={handleSaveExercise}
         exerciseToEdit={exerciseToEdit}
       />
+      </PageContainer>
     </TrainerLayout>
   );
 }

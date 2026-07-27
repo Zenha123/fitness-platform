@@ -1,177 +1,250 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../ui/Button";
+import BottomTabBar from "./BottomTabBar";
 
+/* ─── Nav Config ───────────────────────────────────────────────────────────── */
+const navLinks = [
+  {
+    name: "Roster",
+    path: "/trainer/dashboard",
+    matchPaths: ["/trainer/dashboard", "/trainer/clients"],
+    icon: RosterIcon,
+  },
+  {
+    name: "Schedule",
+    path: "/trainer/schedule",
+    matchPaths: ["/trainer/schedule"],
+    icon: ScheduleIcon,
+  },
+  {
+    name: "Exercises",
+    path: "/trainer/exercises",
+    matchPaths: ["/trainer/exercises"],
+    icon: ExerciseIcon,
+  },
+];
+
+/* ─── Helper: is this link active ─────────────────────────────────────────── */
+function isLinkActive(link, pathname) {
+  return link.matchPaths
+    ? link.matchPaths.some((p) => pathname.startsWith(p))
+    : pathname === link.path;
+}
+
+/* ─── Main Component ───────────────────────────────────────────────────────── */
 export default function TrainerLayout({ children }) {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Close drawer when route changes
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [location.pathname]);
+
+  // Prevent background scroll while drawer is open
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [drawerOpen]);
 
   const initials = user?.name
     ? user.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
     : "T";
 
-  const navLinks = [
-    { name: "Roster", path: "/trainer/dashboard", icon: RosterIcon },
-    { name: "Schedule Workout", path: "/trainer/schedule", icon: ScheduleIcon },
-    { name: "Exercise Library", path: "/trainer/exercises", icon: ExerciseIcon },
-  ];
-
   return (
-    <div className="min-h-screen relative overflow-x-hidden pb-safe" style={{ background: "linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #e0e7ff 100%)" }}>
-      {/* Background Ambient Blobs */}
-      <div className="absolute top-[-150px] right-[-100px] ambient-blob-1"></div>
-      <div className="absolute top-[30vh] left-[-200px] ambient-blob-2"></div>
-      <div className="absolute bottom-[5vh] right-[5%] ambient-blob-coral"></div>
+    <div className="min-h-screen bg-[var(--color-bg)] overflow-x-hidden">
 
-      {/* Top Header */}
-      <header className="bg-white/40 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40 transition-all duration-300 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          
-          {/* Logo & Desktop Nav */}
-          <div className="flex items-center gap-8">
-            <Link to="/trainer/dashboard" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl hero-gradient flex items-center justify-center shadow-md shadow-indigo-500/10 group-hover:scale-105 transition-transform duration-300">
-                <BoltIcon className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-extrabold text-lg tracking-tight text-neutral-900">
-                Fit<span className="text-primary">Coach</span>
-              </span>
-            </Link>
+      {/* ── Sticky Top Header ─────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-40 bg-white border-b border-[var(--color-border)] shadow-[var(--shadow-sm)]">
+        <div className="h-16 px-4 sm:px-6 flex items-center justify-between gap-4">
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1.5">
-              {navLinks.map((link) => {
-                const isActive = 
-                  location.pathname === link.path || 
-                  (link.path === "/trainer/dashboard" && location.pathname.startsWith("/trainer/clients"));
-                return (
-                  <Link
-                    key={link.name}
-                    to={link.path}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 flex items-center gap-2 ${
-                      isActive
-                        ? "bg-primary text-white shadow-sm"
-                        : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/80"
-                    }`}
-                  >
-                    <link.icon className="w-4 h-4" />
-                    {link.name}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
+          {/* Logo */}
+          <Link
+            to="/trainer/dashboard"
+            className="flex items-center gap-2.5 group flex-shrink-0"
+            aria-label="FitCoach home"
+          >
+            <div className="w-9 h-9 rounded-[var(--radius-md)] bg-[var(--color-ink)] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-300">
+              <BoltIcon className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg tracking-tight text-[var(--color-ink)] font-display uppercase select-none">
+              Fit<span className="text-[var(--color-signal)]">Coach</span>
+            </span>
+          </Link>
 
-          {/* Profile & Mobile Menu Toggle */}
-          <div className="flex items-center gap-4">
-            {/* User Profile Summary (Desktop) */}
-            <div className="hidden sm:flex items-center gap-3 text-right">
+          {/* Desktop nav label (lg+ sidebar handles the links) */}
+          <span className="hidden lg:block text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider">
+            Trainer Workspace
+          </span>
+
+          {/* Right side: profile + actions */}
+          <div className="flex items-center gap-3">
+            {/* User info — md+ */}
+            <div className="hidden md:flex items-center gap-2.5 text-right">
               <div>
-                <p className="text-sm font-bold text-neutral-900">{user?.name}</p>
-                <p className="text-[10px] uppercase tracking-wider font-extrabold text-neutral-400">
-                  Trainer (Coach)
-                </p>
+                <p className="text-sm font-bold text-[var(--color-ink)] leading-tight">{user?.name}</p>
+                <p className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-steel)]">Trainer</p>
               </div>
-              <div className="avatar avatar-md bg-indigo-50 text-primary border border-indigo-100 font-extrabold shadow-inner">
+              <div className="w-9 h-9 rounded-[var(--radius-md)] bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-border)] font-bold text-sm flex items-center justify-center select-none">
                 {initials}
               </div>
             </div>
 
-            {/* Sign Out Button (Desktop) */}
+            {/* Sign out — desktop */}
             <Button variant="ghost" size="sm" onClick={logout} className="hidden md:inline-flex">
               Sign out
             </Button>
 
-            {/* Hamburger Button (Mobile) */}
+            {/* Hamburger — shown on md and below (tablet/mobile) */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-neutral-500 hover:bg-neutral-100 transition-colors focus:outline-none"
-              aria-label="Toggle Navigation Menu"
+              onClick={() => setDrawerOpen(!drawerOpen)}
+              className="lg:hidden p-2 rounded-[var(--radius-md)] text-[var(--color-steel)] hover:bg-black/5 hover:text-[var(--color-ink)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]"
+              aria-label={drawerOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={drawerOpen}
+              aria-controls="trainer-mobile-drawer"
             >
-              {mobileMenuOpen ? (
-                <CloseIcon className="w-6 h-6" />
-              ) : (
-                <MenuIcon className="w-6 h-6" />
-              )}
+              {drawerOpen ? <CloseIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Sliding Drawer Menu */}
-      {mobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-40 md:hidden animate-fade-in"
-          onClick={() => setMobileMenuOpen(false)}
+      {/* ── Desktop Left Sidebar ───────────────────────────────────────────── */}
+      {/* Visible only on lg+ screens */}
+      <aside
+        className="hidden lg:flex flex-col fixed top-16 left-0 bottom-0 w-64 bg-white border-r border-[var(--color-border)] z-30 shadow-[var(--shadow-sm)]"
+        aria-label="Trainer navigation"
+      >
+        {/* Nav links */}
+        <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+          {navLinks.map((link) => {
+            const isActive = isLinkActive(link, location.pathname);
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] text-sm font-bold transition-all duration-200 group ${
+                  isActive
+                    ? "bg-[var(--color-ink)] text-white shadow-sm"
+                    : "text-[var(--color-steel)] hover:text-[var(--color-ink)] hover:bg-black/5"
+                }`}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <link.icon
+                  className={`w-5 h-5 flex-shrink-0 transition-colors ${
+                    isActive ? "text-white" : "text-[var(--color-steel)] group-hover:text-[var(--color-ink)]"
+                  }`}
+                />
+                <span>{link.name}</span>
+                {isActive && (
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--color-signal)] flex-shrink-0" />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Sidebar footer */}
+        <div className="px-3 py-4 border-t border-[var(--color-border)]">
+          <button
+            onClick={logout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] text-sm font-bold text-[var(--color-steel)] hover:text-[var(--color-ink)] hover:bg-black/5 transition-all duration-200 group"
+          >
+            <LogOutIcon className="w-5 h-5 flex-shrink-0 group-hover:text-[var(--color-ink)]" />
+            <span>Sign out</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Mobile / Tablet Drawer Backdrop ───────────────────────────────── */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 bg-[var(--color-ink)]/50 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden="true"
         />
       )}
-      <div 
-        className={`fixed top-16 bottom-0 right-0 w-72 bg-white/95 backdrop-blur-lg border-l border-neutral-200 z-40 p-6 md:hidden shadow-2xl flex flex-col justify-between transition-transform duration-300 ease-out ${
-          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="space-y-6">
-          {/* User info in drawer */}
-          <div className="flex items-center gap-3 pb-6 border-b border-neutral-100">
-            <div className="avatar avatar-md bg-indigo-50 text-primary border border-indigo-100 font-extrabold">
-              {initials}
-            </div>
-            <div>
-              <p className="font-bold text-neutral-800 text-sm">{user?.name}</p>
-              <p className="text-[10px] uppercase font-bold text-neutral-400">Trainer Account</p>
-            </div>
-          </div>
 
-          {/* Drawer Navigation Link List */}
-          <nav className="space-y-1">
-            {navLinks.map((link) => {
-              const isActive = 
-                location.pathname === link.path || 
-                (link.path === "/trainer/dashboard" && location.pathname.startsWith("/trainer/clients"));
-              return (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`w-full px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-colors ${
-                    isActive
-                      ? "bg-primary text-white shadow-sm"
-                      : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
-                  }`}
-                >
-                  <link.icon className="w-5 h-5" />
-                  {link.name}
-                </Link>
-              );
-            })}
-          </nav>
+      {/* ── Mobile / Tablet Slide-in Drawer ───────────────────────────────── */}
+      <div
+        id="trainer-mobile-drawer"
+        className={`fixed top-16 bottom-0 right-0 w-72 bg-white border-l border-[var(--color-border)] z-50 lg:hidden flex flex-col transition-transform duration-300 ease-out shadow-[var(--shadow-2xl)] ${
+          drawerOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+        aria-label="Trainer navigation drawer"
+      >
+        {/* Drawer header */}
+        <div className="flex items-center gap-3 px-6 py-5 border-b border-[var(--color-border)]">
+          <div className="w-10 h-10 rounded-[var(--radius-md)] bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-border)] font-bold flex items-center justify-center select-none">
+            {initials}
+          </div>
+          <div>
+            <p className="font-bold text-[var(--color-ink)] text-sm leading-tight">{user?.name}</p>
+            <p className="text-[10px] uppercase font-bold text-[var(--color-steel)]">Trainer Account</p>
+          </div>
         </div>
 
-        <div>
-          <Button 
-            variant="outline" 
-            className="w-full justify-center" 
-            onClick={() => {
-              setMobileMenuOpen(false);
-              logout();
-            }}
+        {/* Drawer nav */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+          {navLinks.map((link) => {
+            const isActive = isLinkActive(link, location.pathname);
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => setDrawerOpen(false)}
+                className={`flex items-center gap-3 px-3 py-3 rounded-[var(--radius-md)] text-sm font-bold transition-all duration-200 ${
+                  isActive
+                    ? "bg-[var(--color-ink)] text-white"
+                    : "text-[var(--color-steel)] hover:text-[var(--color-ink)] hover:bg-black/5"
+                }`}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <link.icon className="w-5 h-5 flex-shrink-0" />
+                {link.name}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Drawer footer */}
+        <div className="px-3 py-4 border-t border-[var(--color-border)]">
+          <Button
+            variant="outline"
+            className="w-full justify-center"
+            onClick={() => { setDrawerOpen(false); logout(); }}
           >
             Sign out
           </Button>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10 page-enter">
-        {children}
-      </main>
+      {/* ── Main Layout Body ───────────────────────────────────────────────── */}
+      {/*
+        lg+:  ml-64 to clear sidebar, no bottom bar
+        < lg: no ml, pb to clear bottom tab bar
+      */}
+      <div className="lg:ml-64 flex flex-col min-h-[calc(100vh-4rem)]">
+        <main
+          className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 page-enter"
+          style={{ minWidth: 0 }} /* prevent flex child overflow */
+        >
+          {children}
+        </main>
+      </div>
+
+      {/* ── Mobile Bottom Tab Bar ──────────────────────────────────────────── */}
+      {/* Shown only on < md; trainer has 3 primary items */}
+      <BottomTabBar tabs={navLinks} />
+
     </div>
   );
 }
 
-/* Icons components */
+/* ─── SVG Icon Components ──────────────────────────────────────────────────── */
 function BoltIcon({ className = "" }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -199,9 +272,7 @@ function ScheduleIcon({ className }) {
 function ExerciseIcon({ className }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path d="M12 14l9-5-9-5-9 5 9 5z" />
-      <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h7" />
     </svg>
   );
 }
@@ -218,6 +289,14 @@ function CloseIcon({ className }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
+function LogOutIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
     </svg>
   );
 }

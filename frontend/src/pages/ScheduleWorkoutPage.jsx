@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import TrainerLayout from "../components/layout/TrainerLayout";
+import PageContainer from "../components/layout/PageContainer";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Spinner, PageLoader } from "../components/ui/Spinner";
@@ -204,25 +205,25 @@ export default function ScheduleWorkoutPage() {
 
   return (
     <TrainerLayout>
-      {/* Lock Banner */}
-      {isLocked && (
-        <div className="mb-6 max-w-6xl mx-auto glass-panel tint-amber border-amber-200/50 flex items-start gap-3 p-4">
-          <LockIcon className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="font-bold text-sm text-amber-800">Workout Locked</p>
-            <p className="text-xs text-amber-700 mt-0.5">{lockReason}</p>
+      <PageContainer variant="builder">
+        {/* Lock Banner */}
+        {isLocked && (
+          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-[var(--radius-xl)] flex items-start gap-3 p-4">
+            <LockIcon className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-bold text-sm text-amber-900">Workout Locked</p>
+              <p className="text-xs text-amber-700 mt-0.5">{lockReason}</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="max-w-6xl mx-auto">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900">
+            <h1 className="text-2xl sm:text-3xl text-[var(--color-ink)]">
               {planId ? (isLocked ? "View Workout" : "Edit Workout") : "Build Workout"}
             </h1>
-            <p className="text-neutral-500 text-sm mt-0.5">
+            <p className="text-[var(--color-steel)] text-sm mt-0.5 font-medium">
               {isLocked ? "Read-only view of this workout plan." : "Design the perfect session for your client."}
             </p>
           </div>
@@ -232,14 +233,14 @@ export default function ScheduleWorkoutPage() {
               <>
                 <button
                   onClick={() => navigate(`/trainer/clients/${clientId}?tab=workouts`)}
-                  className="px-4 py-2 text-sm font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-xl transition-all"
+                  className="px-4 py-2 text-sm font-semibold text-[var(--color-steel)] hover:text-[var(--color-ink)] hover:bg-black/5 rounded-[var(--radius-md)] transition-all"
                 >
                   ← Back
                 </button>
                 <button
                   onClick={handleSaveTemplate}
                   disabled={savingTemplate || exercises.length === 0}
-                  className="px-4 py-2 text-sm font-bold border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-all disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-bold border border-[var(--color-border)] rounded-[var(--radius-md)] hover:bg-black/5 transition-all disabled:opacity-50"
                 >
                   Save as Template
                 </button>
@@ -249,7 +250,7 @@ export default function ScheduleWorkoutPage() {
                 {planId && (
                   <button
                     onClick={handleDeletePlan}
-                    className="px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                    className="px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 rounded-[var(--radius-md)] transition-all"
                   >
                     Delete Plan
                   </button>
@@ -257,14 +258,14 @@ export default function ScheduleWorkoutPage() {
                 <button
                   onClick={handleSaveTemplate}
                   disabled={savingTemplate || exercises.length === 0}
-                  className="px-4 py-2 text-sm font-bold border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-all disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-bold border border-[var(--color-border)] rounded-[var(--radius-md)] hover:bg-black/5 transition-all disabled:opacity-50"
                 >
                   {savingTemplate ? "Saving…" : "Save as Template"}
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl shadow-md shadow-indigo-200 hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:hover:translate-y-0 flex items-center gap-2"
+                  className="px-5 py-2 text-sm font-bold text-white bg-[var(--color-ink)] hover:bg-[var(--color-ink)]/90 rounded-[var(--radius-md)] shadow-sm hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:hover:translate-y-0 flex items-center gap-2"
                 >
                   {saving && <SpinnerMini />}
                   {planId ? "Save Changes" : "Save Workout"}
@@ -279,14 +280,14 @@ export default function ScheduleWorkoutPage() {
         <div className="flex flex-col md:flex-row gap-6">
           {/* ── Left Panel: Settings ── */}
           <div className="w-full md:w-80 flex-shrink-0 space-y-4">
-            <div className="glass-panel tint-sky border-sky-100/50 shadow-sm overflow-hidden">
+            <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm overflow-hidden">
               <div className="p-5 space-y-4">
-                <h2 className="font-bold text-neutral-900">Workout Settings</h2>
+                <h2 className="text-lg text-[var(--color-ink)]">Workout Settings</h2>
 
                 <div>
-                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Client</label>
+                  <label className="block text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider mb-1.5">Client</label>
                   <select
-                    className="w-full h-10 px-3 border border-neutral-200 rounded-xl text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+                    className="w-full h-10 px-3 border border-[var(--color-border)] rounded-[var(--radius-md)] text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all disabled:opacity-60 text-[var(--color-ink)]"
                     value={clientId}
                     onChange={e => setClientId(e.target.value)}
                     disabled={!!planId || isLocked}
@@ -299,10 +300,10 @@ export default function ScheduleWorkoutPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Date</label>
+                  <label className="block text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider mb-1.5">Date</label>
                   <input
                     type="date"
-                    className="w-full h-10 px-3 border border-neutral-200 rounded-xl text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+                    className="w-full h-10 px-3 border border-[var(--color-border)] rounded-[var(--radius-md)] text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all disabled:opacity-60 text-[var(--color-ink)]"
                     value={scheduledDate}
                     onChange={e => setScheduledDate(e.target.value)}
                     disabled={isLocked}
@@ -311,11 +312,11 @@ export default function ScheduleWorkoutPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Workout Title</label>
+                  <label className="block text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider mb-1.5">Workout Title</label>
                   <input
                     type="text"
                     placeholder="e.g. Upper Body Power"
-                    className="w-full h-10 px-3 border border-neutral-200 rounded-xl text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+                    className="w-full h-10 px-3 border border-[var(--color-border)] rounded-[var(--radius-md)] text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all disabled:opacity-60 text-[var(--color-ink)]"
                     value={title}
                     onChange={e => setTitle(e.target.value)}
                     disabled={isLocked}
@@ -324,9 +325,9 @@ export default function ScheduleWorkoutPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Session Notes</label>
+                  <label className="block text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider mb-1.5">Session Notes</label>
                   <textarea
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-xl text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none h-24 disabled:opacity-60"
+                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded-[var(--radius-md)] text-sm bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all resize-none h-24 disabled:opacity-60 text-[var(--color-ink)]"
                     placeholder="e.g. Focus on explosive concentric movements."
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
@@ -338,18 +339,18 @@ export default function ScheduleWorkoutPage() {
 
             {/* Quick stats */}
             {exercises.length > 0 && (
-              <div className="glass-panel tint-violet border-indigo-150/30 p-4 shadow-sm hover-lift">
-                <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3">Plan Summary</p>
+              <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-4 shadow-sm hover-lift">
+                <p className="text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider mb-3">Plan Summary</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white/60 rounded-xl p-3 text-center border border-indigo-150/30">
-                    <p className="text-2xl font-extrabold text-indigo-700">{exercises.length}</p>
-                    <p className="text-[10px] text-indigo-500 font-semibold uppercase tracking-wide mt-0.5">Exercises</p>
+                  <div className="bg-black/5 rounded-[var(--radius-md)] p-3 text-center border border-[var(--color-border)]">
+                    <p className="text-2xl font-extrabold text-[var(--color-ink)]">{exercises.length}</p>
+                    <p className="text-[10px] text-[var(--color-steel)] font-semibold uppercase tracking-wide mt-0.5">Exercises</p>
                   </div>
-                  <div className="bg-white/60 rounded-xl p-3 text-center border border-indigo-150/30">
-                    <p className="text-2xl font-extrabold text-indigo-700">
+                  <div className="bg-black/5 rounded-[var(--radius-md)] p-3 text-center border border-[var(--color-border)]">
+                    <p className="text-2xl font-extrabold text-[var(--color-ink)]">
                       {exercises.reduce((s, ex) => s + (parseInt(ex.sets) || 0), 0)}
                     </p>
-                    <p className="text-[10px] text-indigo-500 font-semibold uppercase tracking-wide mt-0.5">Total Sets</p>
+                    <p className="text-[10px] text-[var(--color-steel)] font-semibold uppercase tracking-wide mt-0.5">Total Sets</p>
                   </div>
                 </div>
               </div>
@@ -362,10 +363,10 @@ export default function ScheduleWorkoutPage() {
               {exercises.map((ex, index) => (
                 <div
                   key={ex.id || ex._localId}
-                  className="group glass-panel tint-violet border-indigo-150/30 p-5 flex gap-4 hover-lift shadow-sm"
+                  className="group bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-5 flex gap-4 hover-lift shadow-sm"
                 >
                   {!isLocked && (
-                    <div className="pt-2 cursor-move text-neutral-300 hover:text-neutral-500 transition-colors flex-shrink-0">
+                    <div className="pt-2 cursor-move text-[var(--color-steel)] hover:text-[var(--color-ink)] transition-colors flex-shrink-0">
                       <DragIcon className="w-5 h-5" />
                     </div>
                   )}
@@ -373,17 +374,17 @@ export default function ScheduleWorkoutPage() {
                   <div className="flex-1 min-w-0 space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-white/85 border border-indigo-100/50 px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-steel)] bg-black/5 border border-[var(--color-border)] px-2 py-0.5 rounded-[var(--radius-sm)]">
                           {ex.exercise_category || ex.exercise_detail?.category}
                         </span>
-                        <h3 className="font-bold text-neutral-900 text-base mt-1">
+                        <h3 className="text-xl text-[var(--color-ink)] mt-1">
                           {ex.exercise_name || ex.exercise_detail?.name}
                         </h3>
                       </div>
                       {!isLocked && (
                         <button
                           onClick={() => removeExercise(index)}
-                          className="text-neutral-300 hover:text-rose-500 p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100 hover:bg-rose-50"
+                          className="text-[var(--color-steel)] hover:text-rose-500 p-1.5 rounded-[var(--radius-sm)] transition-colors opacity-0 group-hover:opacity-100 hover:bg-rose-50"
                         >
                           <TrashIcon className="w-4 h-4" />
                         </button>
@@ -398,10 +399,10 @@ export default function ScheduleWorkoutPage() {
                         { label: "Rest (sec)", field: "rest_seconds", type: "number", step: "5", placeholder: "90" },
                       ].map(({ label, field, ...inputProps }) => (
                         <div key={field}>
-                          <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">{label}</label>
+                          <label className="block text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-wider mb-1">{label}</label>
                           <input
                             {...inputProps}
-                            className="w-full h-9 px-3 border border-neutral-200 rounded-lg text-sm text-center font-semibold bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:bg-neutral-100 disabled:text-neutral-400"
+                            className="w-full h-9 px-3 border border-[var(--color-border)] rounded-[var(--radius-md)] text-sm text-center font-semibold bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all disabled:bg-neutral-100 disabled:text-[var(--color-steel)] text-[var(--color-ink)]"
                             value={field === "weight_kg" ? (ex.weight_kg || "") : (field === "rest_seconds" ? (ex.rest_seconds || "") : ex[field])}
                             onChange={e => updateExercise(index, field, e.target.value)}
                             disabled={isLocked}
@@ -413,7 +414,7 @@ export default function ScheduleWorkoutPage() {
                     <input
                       type="text"
                       placeholder={isLocked ? "" : "Add exercise notes or coaching cues…"}
-                      className="w-full text-xs text-neutral-600 border border-neutral-100 bg-neutral-50/60 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500/20 disabled:bg-neutral-100/50 disabled:text-neutral-400"
+                      className="w-full text-xs text-[var(--color-ink)] border border-[var(--color-border)] bg-neutral-50 rounded-[var(--radius-md)] px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[var(--color-ink)]/20 disabled:bg-neutral-100/50 disabled:text-[var(--color-steel)]"
                       value={ex.notes || ""}
                       onChange={e => updateExercise(index, 'notes', e.target.value)}
                       disabled={isLocked}
@@ -424,20 +425,20 @@ export default function ScheduleWorkoutPage() {
 
               {/* Empty state */}
               {exercises.length === 0 && (
-                <div className="border-2 border-dashed border-neutral-200 rounded-2xl bg-neutral-50/50 flex flex-col items-center justify-center py-16 text-center px-6">
-                  <div className="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-500 flex items-center justify-center mb-4">
+                <div className="border-2 border-dashed border-[var(--color-border)] rounded-[var(--radius-xl)] bg-black/5 flex flex-col items-center justify-center py-16 text-center px-6">
+                  <div className="w-14 h-14 rounded-[var(--radius-md)] bg-white border border-[var(--color-border)] text-[var(--color-steel)] flex items-center justify-center mb-4">
                     <DumbbellIcon className="w-7 h-7" />
                   </div>
-                  <h3 className="font-bold text-neutral-900 mb-1">No exercises yet</h3>
-                  <p className="text-sm text-neutral-500 mb-5">
+                  <h3 className="text-xl text-[var(--color-ink)] mb-1">No exercises yet</h3>
+                  <p className="text-sm text-[var(--color-steel)] mb-5 font-medium">
                     Add exercises from your library or load a saved template.
                   </p>
                   {!isLocked && (
                     <button
                       onClick={() => setTemplatePickerOpen(true)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-bold border border-neutral-200 bg-white rounded-xl hover:bg-neutral-50 transition-all shadow-sm"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-bold border border-[var(--color-border)] bg-white rounded-[var(--radius-md)] hover:bg-black/5 transition-all shadow-sm"
                     >
-                      <FolderIcon className="w-4 h-4 text-indigo-500" />
+                      <FolderIcon className="w-4 h-4 text-[var(--color-steel)]" />
                       Load Template
                     </button>
                   )}
@@ -449,14 +450,14 @@ export default function ScheduleWorkoutPage() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setPickerOpen(true)}
-                  className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-indigo-200 rounded-2xl text-sm font-bold text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50/50 transition-all"
+                  className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-[var(--color-border)] rounded-[var(--radius-xl)] text-sm font-bold text-[var(--color-ink)] hover:border-[var(--color-ink)] hover:bg-black/5 transition-all"
                 >
                   <PlusIcon className="w-4 h-4" />
                   Add Exercise
                 </button>
                 <button
                   onClick={() => setTemplatePickerOpen(true)}
-                  className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-neutral-200 rounded-2xl text-sm font-bold text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50/60 transition-all"
+                  className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-[var(--color-border)] rounded-[var(--radius-xl)] text-sm font-bold text-[var(--color-steel)] hover:border-[var(--color-ink)] hover:bg-black/5 hover:text-[var(--color-ink)] transition-all"
                 >
                   <FolderIcon className="w-4 h-4" />
                   Load Template
@@ -465,7 +466,6 @@ export default function ScheduleWorkoutPage() {
             )}
           </div>
         </div>
-      </div>
 
       <ExercisePicker
         isOpen={pickerOpen}
@@ -477,6 +477,7 @@ export default function ScheduleWorkoutPage() {
         onClose={() => setTemplatePickerOpen(false)}
         onSelect={handleLoadTemplate}
       />
+      </PageContainer>
     </TrainerLayout>
   );
 }

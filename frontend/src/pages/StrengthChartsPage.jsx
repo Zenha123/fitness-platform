@@ -6,6 +6,7 @@ import { Alert } from "../components/ui/Alert";
 import { Spinner, PageLoader } from "../components/ui/Spinner";
 import StrengthChart from "../components/progress/StrengthChart";
 import ClientLayout from "../components/layout/ClientLayout";
+import PageContainer from "../components/layout/PageContainer";
 
 export default function StrengthChartsPage() {
   const { user } = useAuth();
@@ -66,45 +67,41 @@ export default function StrengthChartsPage() {
 
   return (
     <ClientLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <PageContainer variant="dashboard" className="space-y-6">
         {/* Page Header */}
         <div className="flex items-center gap-3 mb-2">
           <Link
             to="/client/dashboard"
-            className="p-2 rounded-xl hover:bg-neutral-100 text-neutral-500 transition-colors -ml-2"
+            className="p-2 rounded-[var(--radius-md)] hover:bg-black/5 text-[var(--color-steel)] transition-colors -ml-2"
           >
             <ArrowLeftIcon className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="font-extrabold text-base text-neutral-900">Strength Analytics</h1>
-            <p className="text-xs text-neutral-400">Progressive overload tracking</p>
+            <h1 className="text-base text-[var(--color-ink)]">Strength Analytics</h1>
+            <p className="text-xs text-[var(--color-steel)]">Progressive overload tracking</p>
           </div>
         </div>
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-2xl"
-          style={{ background: "linear-gradient(135deg, #312e81 0%, #4f46e5 60%, #7c3aed 100%)" }}
-        >
-          <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full opacity-10"
-            style={{ background: "radial-gradient(circle, #a5b4fc 0%, transparent 70%)" }} />
+        <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[var(--color-paper)] border border-[var(--color-border)] shadow-sm">
           <div className="relative z-10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-6 justify-between">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <TrophyIcon className="w-5 h-5 text-yellow-400" />
-                <span className="text-indigo-200 text-xs font-bold uppercase tracking-wider">Strength Progression</span>
+                <TrophyIcon className="w-5 h-5 text-[var(--color-signal)]" />
+                <span className="text-[var(--color-steel)] text-xs font-bold uppercase tracking-wider">Strength Progression</span>
               </div>
-              <h2 className="text-2xl font-extrabold text-white">
+              <h2 className="text-2xl text-[var(--color-ink)]">
                 {selectedExercise?.name || "Select an Exercise"}
               </h2>
-              <p className="text-indigo-200 text-sm mt-1">
+              <p className="text-[var(--color-steel)] text-sm mt-1 font-medium">
                 Analyze your progressive overload. PRs are automatically detected.
               </p>
             </div>
 
             {pr && (
-              <div className="flex-shrink-0 bg-white/10 backdrop-blur rounded-2xl px-6 py-4 text-center border border-white/20">
-                <p className="text-yellow-400 text-[10px] font-black uppercase tracking-widest mb-1">Personal Record</p>
-                <p className="text-3xl font-extrabold text-white">{pr.weight}{unit}</p>
-                <p className="text-indigo-300 text-xs mt-1">{pr.reps} reps · {new Date(pr.date).toLocaleDateString()}</p>
+              <div className="flex-shrink-0 bg-black/5 rounded-[var(--radius-xl)] px-6 py-4 text-center border border-[var(--color-border)]">
+                <p className="text-[var(--color-signal)] text-[10px] font-black uppercase tracking-widest mb-1">Personal Record</p>
+                <p className="text-3xl font-extrabold text-[var(--color-ink)]">{pr.weight}{unit}</p>
+                <p className="text-[var(--color-steel)] text-xs font-bold mt-1">{pr.reps} reps · {new Date(pr.date).toLocaleDateString()}</p>
               </div>
             )}
           </div>
@@ -114,16 +111,16 @@ export default function StrengthChartsPage() {
 
         {exercises.length === 0 ? (
           /* Empty state */
-          <div className="bg-white border border-neutral-200 rounded-2xl p-12 text-center shadow-sm">
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-violet-100 text-indigo-400 rounded-3xl flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-xl)] p-12 text-center shadow-sm">
+            <div className="w-16 h-16 bg-[var(--color-paper)] border border-[var(--color-border)] text-[var(--color-ink)] rounded-[var(--radius-md)] flex items-center justify-center mx-auto mb-4">
               <DumbbellIcon className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-bold text-neutral-900 mb-2">No exercise data yet</h3>
-            <p className="text-neutral-500 max-w-sm mx-auto mb-6 text-sm leading-relaxed">
+            <h3 className="text-lg text-[var(--color-ink)] mb-2">No exercise data yet</h3>
+            <p className="text-[var(--color-steel)] max-w-sm mx-auto mb-6 text-sm leading-relaxed font-medium">
               You haven't completed any workouts with weight entries yet. Strength charts will appear here automatically once you log weights.
             </p>
             <Link to="/client/dashboard">
-              <button className="px-4 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-200">
+              <button className="px-5 py-2 text-sm font-bold text-white bg-[var(--color-ink)] hover:bg-[var(--color-ink)]/90 rounded-[var(--radius-md)] transition-all shadow-sm">
                 Go to Dashboard
               </button>
             </Link>
@@ -131,14 +128,14 @@ export default function StrengthChartsPage() {
         ) : (
           <div className="space-y-5">
             {/* Exercise Selector */}
-            <div className="glass-panel tint-sky border-sky-100/50 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-md">
+            <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
               <div className="flex-1 min-w-0">
-                <label htmlFor="exercise-select" className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
+                <label htmlFor="exercise-select" className="block text-xs font-bold text-[var(--color-steel)] uppercase tracking-wider mb-1.5">
                   Select Exercise to Track
                 </label>
                 <select
                   id="exercise-select"
-                  className="w-full h-10 px-3 bg-white/60 border border-neutral-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+                  className="w-full h-10 px-3 bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all disabled:opacity-60"
                   value={selectedExerciseId}
                   onChange={(e) => setSelectedExerciseId(e.target.value)}
                   disabled={loadingChart}
@@ -152,25 +149,24 @@ export default function StrengthChartsPage() {
               </div>
 
               {selectedExercise && (
-                <div className="flex-shrink-0 bg-white/60 border border-indigo-100/50 rounded-xl px-4 py-3 text-center">
-                  <span className="text-[10px] uppercase font-black text-indigo-500 tracking-widest block">Category</span>
-                  <span className="text-sm font-extrabold text-indigo-700 capitalize">{selectedExercise.category}</span>
+                <div className="flex-shrink-0 bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] px-4 py-3 text-center">
+                  <span className="text-[10px] uppercase font-black text-[var(--color-steel)] tracking-widest block">Category</span>
+                  <span className="text-sm font-extrabold text-[var(--color-ink)] capitalize">{selectedExercise.category}</span>
                 </div>
               )}
             </div>
 
             {/* Chart Area */}
             {loadingChart ? (
-              <div className="bg-white border border-neutral-200 rounded-2xl h-80 flex items-center justify-center shadow-sm">
+              <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-xl)] h-80 flex items-center justify-center shadow-sm">
                 <div className="flex flex-col items-center gap-3">
                   <Spinner />
-                  <p className="text-sm text-neutral-400">Loading chart data…</p>
+                  <p className="text-sm text-[var(--color-steel)] font-bold">Loading chart data…</p>
                 </div>
               </div>
             ) : (
               chartData && (
-                <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-                  <div className="h-1 bg-gradient-to-r from-indigo-500 to-violet-500" />
+                <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm overflow-hidden pt-4">
                   <StrengthChart
                     data={chartData.data}
                     pr={chartData.pr}
@@ -182,7 +178,7 @@ export default function StrengthChartsPage() {
             )}
           </div>
         )}
-      </div>
+      </PageContainer>
     </ClientLayout>
   );
 }

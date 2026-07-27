@@ -1,18 +1,18 @@
 import React from "react";
 
 const variants = {
-  danger:  { cls: "alert alert-danger",  Icon: XCircleIcon },
-  success: { cls: "alert alert-success", Icon: CheckCircleIcon },
-  warning: { cls: "alert alert-warning", Icon: ExclamationIcon },
-  info:    { cls: "alert alert-info",    Icon: InfoIcon },
+  danger:  { cls: "bg-[var(--color-signal-dim)] border border-[var(--color-signal)]/30 text-[var(--color-signal)]", Icon: XCircleIcon },
+  success: { cls: "bg-[var(--color-paper)] border border-[var(--color-steel-light)] text-[var(--color-ink)]", Icon: CheckCircleIcon },
+  warning: { cls: "bg-[var(--color-signal-dim)] border border-[var(--color-signal)]/30 text-[var(--color-signal)]", Icon: ExclamationIcon },
+  info:    { cls: "bg-[var(--color-paper)] border border-[var(--color-steel-light)] text-[var(--color-ink)]", Icon: InfoIcon },
 };
 
 export function Alert({ variant = "danger", children, className = "" }) {
-  const { cls, Icon } = variants[variant] ?? variants.danger;
+  const { cls, Icon } = variants[variant] || variants.info;
   return (
-    <div className={`${cls} ${className}`} role="alert">
-      <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
-      <div className="flex-1">{children}</div>
+    <div className={`flex items-start gap-3 p-4 rounded-[var(--radius-lg)] shadow-sm animate-fade-in ${cls} ${className}`} role="alert">
+      <Icon className="w-5 h-5 shrink-0 mt-0.5" />
+      <div className="flex-1 text-sm font-semibold">{children}</div>
     </div>
   );
 }

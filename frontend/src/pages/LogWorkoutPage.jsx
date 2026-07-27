@@ -6,6 +6,7 @@ import { Alert } from "../components/ui/Alert";
 import { PageLoader } from "../components/ui/Spinner";
 import ExercisePicker from "../components/workouts/ExercisePicker";
 import ClientLayout from "../components/layout/ClientLayout";
+import PageContainer from "../components/layout/PageContainer";
 
 export default function LogWorkoutPage() {
   const navigate = useNavigate();
@@ -136,31 +137,31 @@ export default function LogWorkoutPage() {
 
   return (
     <ClientLayout>
-      <div className="max-w-3xl mx-auto space-y-5 pb-24">
+      <PageContainer variant="builder" className="space-y-5">
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/client/dashboard")}
-              className="p-2 -ml-1 rounded-xl hover:bg-neutral-100 text-neutral-500 transition-colors"
+              className="p-2 -ml-1 rounded-[var(--radius-md)] hover:bg-black/5 text-[var(--color-steel)] transition-colors"
             >
               <ArrowLeftIcon className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="font-extrabold text-base text-neutral-900 leading-tight">
+              <h1 className="text-base text-[var(--color-ink)] leading-tight">
                 {logId ? "Edit Log" : "Log Workout"}
               </h1>
-              <p className="text-xs text-neutral-400 leading-none">{date}</p>
+              <p className="text-xs text-[var(--color-steel)] leading-none mt-1">{date}</p>
             </div>
           </div>
 
           {/* Date picker for ad-hoc */}
           {isAdHoc && (
             <div className="flex items-center gap-2">
-              <label className="text-xs font-bold text-neutral-400 uppercase tracking-wide">Date</label>
+              <label className="text-xs font-bold text-[var(--color-steel)] uppercase tracking-wide">Date</label>
               <input
                 type="date"
-                className="text-sm border border-neutral-200 rounded-xl px-3 py-1.5 bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                className="text-sm border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all text-[var(--color-ink)] font-semibold"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
               />
@@ -173,8 +174,8 @@ export default function LogWorkoutPage() {
         {/* Title */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-extrabold text-neutral-900">{planTitle}</h2>
-            <p className="text-neutral-500 text-sm mt-0.5">
+            <h2 className="text-2xl text-[var(--color-ink)]">{planTitle}</h2>
+            <p className="text-[var(--color-steel)] text-sm mt-0.5 font-medium">
               {isAdHoc ? "Add exercises and log your actual performance." : "Track your actual sets, reps, and weights below."}
             </p>
           </div>
@@ -189,46 +190,46 @@ export default function LogWorkoutPage() {
         {/* Exercise Cards */}
         <div className="space-y-4">
           {entries.length === 0 ? (
-            <div className="bg-white border-2 border-dashed border-neutral-200 rounded-2xl flex flex-col items-center justify-center py-14 text-center px-6">
+            <div className="bg-[var(--color-paper)] border-2 border-dashed border-[var(--color-border)] rounded-[var(--radius-xl)] flex flex-col items-center justify-center py-14 text-center px-6 shadow-sm">
               {isAdHoc ? (
                 <>
-                  <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center mb-4">
-                    <DumbbellIcon className="w-7 h-7 text-indigo-500" />
+                  <div className="w-14 h-14 rounded-[var(--radius-md)] bg-[var(--color-paper)] border border-[var(--color-border)] flex items-center justify-center mb-4">
+                    <DumbbellIcon className="w-7 h-7 text-[var(--color-ink)]" />
                   </div>
-                  <p className="font-bold text-neutral-800">No exercises added</p>
-                  <p className="text-sm text-neutral-400 mt-1 mb-5">
+                  <p className="text-[var(--color-ink)] font-display uppercase tracking-wider">No exercises added</p>
+                  <p className="text-sm text-[var(--color-steel)] mt-1 mb-5 font-medium">
                     Tap the button below to add exercises from your trainer's library.
                   </p>
                   <button
                     onClick={() => setPickerOpen(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-200 transition-all"
+                    className="inline-flex items-center gap-2 px-5 py-2 text-sm font-bold text-white bg-[var(--color-ink)] hover:bg-[var(--color-ink)]/90 rounded-[var(--radius-md)] shadow-sm transition-all"
                   >
                     <PlusIcon className="w-4 h-4" />
                     Add Exercise
                   </button>
                 </>
               ) : (
-                <p className="text-neutral-500">No exercises assigned for this workout.</p>
+                <p className="text-[var(--color-steel)] font-medium">No exercises assigned for this workout.</p>
               )}
             </div>
           ) : (
             entries.map((entry, idx) => (
               <div
                 key={entry._localId || entry.id || idx}
-                className="glass-panel tint-violet border-indigo-150/30 overflow-hidden shadow-md"
+                className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] overflow-hidden shadow-sm hover-lift"
               >
                 {/* Left-border accent */}
                 <div className="flex">
-                  <div className="w-1 flex-shrink-0 bg-gradient-to-b from-indigo-400 to-violet-500 rounded-l-2xl" />
+                  <div className="w-1 flex-shrink-0 bg-[var(--color-ink)]" />
 
                   <div className="flex-1 p-5 space-y-4">
                     {/* Header */}
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-ink)] bg-black/5 border border-[var(--color-border)] px-2 py-0.5 rounded-[var(--radius-sm)]">
                           #{idx + 1}
                         </span>
-                        <h3 className="font-extrabold text-neutral-900 text-lg mt-1">{entry.exercise_name}</h3>
+                        <h3 className="text-[var(--color-ink)] text-lg mt-1">{entry.exercise_name}</h3>
                       </div>
                       <div className="flex items-center gap-2">
                         {entry.exercise_demo_link && (
@@ -236,7 +237,7 @@ export default function LogWorkoutPage() {
                             href={entry.exercise_demo_link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-indigo-500 to-violet-500 px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink)] bg-white border border-[var(--color-border)] hover:bg-black/5 px-2.5 py-1.5 rounded-[var(--radius-md)] shadow-sm transition-all"
                           >
                             <VideoIcon className="w-3.5 h-3.5" />
                             Demo
@@ -245,7 +246,7 @@ export default function LogWorkoutPage() {
                         {!completed && (
                           <button
                             onClick={() => handleRemoveEntry(idx)}
-                            className="p-1.5 rounded-xl text-neutral-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
+                            className="p-1.5 rounded-[var(--radius-md)] text-[var(--color-steel)] hover:text-[var(--color-signal)] hover:bg-[var(--color-signal)]/10 transition-all"
                           >
                             <XIcon className="w-4 h-4" />
                           </button>
@@ -260,11 +261,11 @@ export default function LogWorkoutPage() {
                         { label: "Reps", field: "actual_reps", type: "text", placeholder: "e.g. 10" },
                         { label: "Weight (kg)", field: "actual_weight_kg", type: "number", step: "0.5", placeholder: "BW" },
                       ].map(({ label, field, ...inputProps }) => (
-                        <div key={field} className="bg-white/60 rounded-xl p-3 border border-indigo-100/50">
-                          <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">{label}</label>
+                        <div key={field} className="bg-white rounded-[var(--radius-md)] p-3 border border-[var(--color-border)] focus-within:ring-2 focus-within:ring-[var(--color-ink)]/20 focus-within:border-[var(--color-ink)] transition-all">
+                          <label className="block text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1.5">{label}</label>
                           <input
                             {...inputProps}
-                            className="w-full text-center text-lg font-extrabold text-neutral-900 bg-transparent border-none outline-none focus:outline-none"
+                            className="w-full text-center text-lg font-extrabold text-[var(--color-ink)] bg-transparent border-none outline-none focus:outline-none"
                             value={entry[field]}
                             onChange={(e) => handleEntryChange(idx, field, e.target.value)}
                           />
@@ -276,7 +277,7 @@ export default function LogWorkoutPage() {
                     <input
                       type="text"
                       placeholder="Add notes for this exercise…"
-                      className="w-full text-sm text-neutral-600 bg-neutral-50 border border-neutral-100 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500/30"
+                      className="w-full text-sm font-semibold text-[var(--color-ink)] bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all placeholder:text-[var(--color-steel)]/70"
                       value={entry.notes}
                       onChange={(e) => handleEntryChange(idx, "notes", e.target.value)}
                     />
@@ -290,7 +291,7 @@ export default function LogWorkoutPage() {
           {!completed && entries.length > 0 && (
             <button
               onClick={() => setPickerOpen(true)}
-              className="w-full py-3.5 border-2 border-dashed border-indigo-200 rounded-2xl text-sm font-bold text-indigo-500 hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50/40 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3.5 border-2 border-dashed border-[var(--color-border)] rounded-[var(--radius-xl)] text-sm font-bold text-[var(--color-ink)] hover:border-[var(--color-ink)] hover:bg-black/5 transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
             >
               <PlusIcon className="w-4 h-4" />
               Add Another Exercise
@@ -299,26 +300,25 @@ export default function LogWorkoutPage() {
         </div>
 
         {/* Session Notes */}
-        <div className="glass-panel tint-sky border-sky-100/50 p-5 shadow-md">
-          <label className="block text-sm font-bold text-neutral-900 mb-2.5 flex items-center gap-2">
-            <NotesIcon className="w-4 h-4 text-indigo-400" />
+        <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-5 shadow-sm">
+          <label className="block text-sm text-[var(--color-ink)] mb-2.5 flex items-center gap-2 font-display uppercase tracking-wider">
+            <NotesIcon className="w-4 h-4 text-[var(--color-ink)]" />
             Session Notes
           </label>
           <textarea
-            className="w-full min-h-[96px] resize-y text-sm text-neutral-700 bg-neutral-50 border border-neutral-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+            className="w-full min-h-[96px] resize-y text-sm text-[var(--color-ink)] bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)] transition-all font-semibold"
             placeholder="How did the workout feel? Any general observations?"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
         </div>
-      </div>
 
       {/* ── Sticky Action Bar ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-neutral-200 px-4 py-4 pb-safe shadow-2xl z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-[var(--color-border)] px-4 py-4 pb-safe shadow-2xl z-40">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           {!completed && (
             <button
-              className="flex-1 py-3 text-sm font-bold border-2 border-neutral-200 text-neutral-600 rounded-2xl hover:bg-neutral-50 hover:border-neutral-300 transition-all disabled:opacity-60"
+              className="flex-1 py-3 text-sm font-bold border-2 border-[var(--color-border)] text-[var(--color-ink)] rounded-[var(--radius-md)] hover:bg-black/5 hover:border-[var(--color-ink)] transition-all disabled:opacity-60"
               onClick={() => handleSave(false)}
               disabled={saving}
             >
@@ -326,7 +326,7 @@ export default function LogWorkoutPage() {
             </button>
           )}
           <button
-            className="flex-1 py-3 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-2xl shadow-lg shadow-indigo-200 hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+            className="flex-1 py-3 text-sm font-bold text-white bg-[var(--color-ink)] hover:bg-[var(--color-ink)]/90 rounded-[var(--radius-md)] shadow-sm hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:hover:translate-y-0 flex items-center justify-center gap-2 uppercase tracking-wider"
             onClick={() => handleSave(true)}
             disabled={saving}
           >
@@ -341,6 +341,7 @@ export default function LogWorkoutPage() {
         onClose={() => setPickerOpen(false)}
         onSelect={handleAddExercise}
       />
+      </PageContainer>
     </ClientLayout>
   );
 }
