@@ -147,9 +147,13 @@ export default function ClientLayout({ children }) {
       {/* ── Mobile Slide-in Drawer ────────────────────────────────────────── */}
       <div
         id="client-mobile-drawer"
-        className={`fixed top-16 bottom-0 right-0 w-72 bg-white border-l border-[var(--color-border)] z-50 md:hidden flex flex-col transition-transform duration-300 ease-out shadow-[var(--shadow-2xl)] ${
+        className={`fixed top-16 right-0 w-72 bg-white border-l border-[var(--color-border)] z-50 md:hidden flex flex-col transition-transform duration-300 ease-out shadow-[var(--shadow-2xl)] ${
           drawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
+        style={{
+          /* Keep drawer above the fixed bottom tab bar on mobile */
+          bottom: "calc(3.5rem + env(safe-area-inset-bottom, 0px))",
+        }}
         aria-label="Client navigation drawer"
       >
         {/* Drawer header */}

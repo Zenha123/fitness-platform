@@ -137,7 +137,7 @@ export default function LogWorkoutPage() {
 
   return (
     <ClientLayout>
-      <PageContainer variant="builder" className="space-y-5">
+      <PageContainer variant="builder" className="space-y-5 pb-40 md:pb-24">
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -314,7 +314,14 @@ export default function LogWorkoutPage() {
         </div>
 
       {/* ── Sticky Action Bar ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-[var(--color-border)] px-4 py-4 pb-safe shadow-2xl z-40">
+      {/* Mobile: rises above 3.5rem bottom tab bar; md+: flush with viewport bottom */}
+      <div
+        className="fixed left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-[var(--color-border)] px-4 py-3 shadow-[var(--shadow-xl)] z-40 md:bottom-0"
+        style={{
+          /* Sit above the mobile bottom tab bar (3.5rem) + safe area; md+ ignores this via md:bottom-0 */
+          bottom: "calc(3.5rem + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           {!completed && (
             <button

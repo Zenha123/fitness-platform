@@ -171,9 +171,13 @@ export default function TrainerLayout({ children }) {
       {/* ── Mobile / Tablet Slide-in Drawer ───────────────────────────────── */}
       <div
         id="trainer-mobile-drawer"
-        className={`fixed top-16 bottom-0 right-0 w-72 bg-white border-l border-[var(--color-border)] z-50 lg:hidden flex flex-col transition-transform duration-300 ease-out shadow-[var(--shadow-2xl)] ${
+        className={`fixed top-16 right-0 w-72 bg-white border-l border-[var(--color-border)] z-50 lg:hidden flex flex-col transition-transform duration-300 ease-out shadow-[var(--shadow-2xl)] ${
           drawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
+        style={{
+          /* On mobile the bottom tab bar is fixed at bottom-0; keep drawer above it */
+          bottom: "calc(3.5rem + env(safe-area-inset-bottom, 0px))",
+        }}
         aria-label="Trainer navigation drawer"
       >
         {/* Drawer header */}
@@ -229,7 +233,7 @@ export default function TrainerLayout({ children }) {
       */}
       <div className="lg:ml-64 flex flex-col min-h-[calc(100vh-4rem)]">
         <main
-          className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 page-enter"
+          className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 lg:pb-8 page-enter"
           style={{ minWidth: 0 }} /* prevent flex child overflow */
         >
           {children}
