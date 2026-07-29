@@ -3,8 +3,10 @@ import axios from "axios";
 const ACCESS_TOKEN_KEY = "fcp_access_token";
 const REFRESH_TOKEN_KEY = "fcp_refresh_token";
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api",
+  baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -29,33 +31,55 @@ axiosClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Shared promise for concurrent 401s — all waiters share ONE refresh call.
+// Reset only after the promise settles so no second caller starts a new
+// refresh with the already-rotated (now blacklisted) token.
 let refreshInFlight = null;
 
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const { config, response } = error;
+
+    // Only attempt refresh for 401s that haven't been retried yet
     if (response?.status !== 401 || config._retry || !getRefreshToken()) {
       return Promise.reject(error);
     }
     config._retry = true;
-    try {
-      refreshInFlight =
-        refreshInFlight ||
-        axios.post(`${axiosClient.defaults.baseURL}/auth/token/refresh/`, {
-          refresh: getRefreshToken(),
+
+    // Start one shared refresh call; all concurrent 401 failures share it
+    if (!refreshInFlight) {
+      // Build the refresh URL from the base URL's origin to avoid double /api/ prefix
+      const origin = new URL(BASE_URL).origin;
+      refreshInFlight = axios
+        .post(`${origin}/api/auth/token/refresh/`, { refresh: getRefreshToken() })
+        .then((res) => {
+          setTokens({ access: res.data.access, refresh: res.data.refresh });
+          return res.data.access;
+        })
+        .catch((err) => {
+          // Refresh failed — clear everything and force re-login
+          clearTokens();
+          localStorage.removeItem("fcp_user");
+          // Redirect to login only if not already there
+          if (!window.location.pathname.includes("/login")) {
+            window.location.href = "/login";
+          }
+          return Promise.reject(err);
+        })
+        .finally(() => {
+          refreshInFlight = null;
         });
-      const { data } = await refreshInFlight;
-      setTokens({ access: data.access });
-      config.headers.Authorization = `Bearer ${data.access}`;
+    }
+
+    try {
+      const newAccessToken = await refreshInFlight;
+      config.headers.Authorization = `Bearer ${newAccessToken}`;
       return axiosClient(config);
     } catch (refreshError) {
-      clearTokens();
       return Promise.reject(refreshError);
-    } finally {
-      refreshInFlight = null;
     }
   }
 );
 
-export default axiosClient;
+export default axiosClient;

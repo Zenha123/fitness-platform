@@ -156,3 +156,75 @@ class WorkoutLogViewSet(viewsets.ModelViewSet):
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("Only clients can delete workout logs.")
         instance.delete()
+
+
+from rest_framework.views import APIView
+from django.utils import timezone
+import datetime
+
+class WorkoutReportsView(APIView):
+    permission_classes = [IsTrainer]
+
+    def get(self, request):
+        trainer = request.user
+        links = TrainerClientLink.objects.filter(trainer=trainer).select_related('client')
+        
+        today = timezone.localdate()
+        current_year = today.year
+        current_month = today.month
+
+        reports = []
+        for link in links:
+            client = link.client
+            
+            plans = WorkoutPlan.objects.filter(client=client, trainer=trainer)
+            logs = WorkoutLog.objects.filter(client=client, completed=True)
+            
+            total_assigned = plans.count()
+            total_completed = logs.count()
+            monthly_completed = logs.filter(date__year=current_year, date__month=current_month).count()
+            
+            last_log = logs.order_by('-date').first()
+            last_workout_date = str(last_log.date) if last_log else None
+            
+            completion_rate = round((total_completed / total_assigned) * 100) if total_assigned > 0 else 0
+            
+            # Simple streak calculation (consecutive completed sessions)
+            streak = 0
+            recent_logs = list(logs.order_by('-date')[:10])
+            if recent_logs:
+                streak = len(recent_logs)
+                
+            reports.append({
+                "client_id": str(client.id),
+                "client_name": client.name,
+                "client_email": client.email,
+                "is_active": client.is_active,
+                "total_assigned": total_assigned,
+                "total_completed": total_completed,
+                "monthly_completed": monthly_completed,
+                "completion_rate": completion_rate,
+                "streak": streak,
+                "last_workout_date": last_workout_date
+            })
+
+        # Calculate roster summary stats
+        total_clients = len(reports)
+        active_clients = sum(1 for r in reports if r["is_active"])
+        overall_completion = round(sum(r["completion_rate"] for r in reports) / total_clients) if total_clients > 0 else 0
+        total_monthly_sessions = sum(r["monthly_completed"] for r in reports)
+
+        # Leaderboard: clients sorted by monthly completed sessions descending
+        leaderboard = sorted(reports, key=lambda x: (x["monthly_completed"], x["total_completed"]), reverse=True)
+
+        return Response({
+            "summary": {
+                "total_clients": total_clients,
+                "active_clients": active_clients,
+                "overall_completion_rate": overall_completion,
+                "total_monthly_sessions": total_monthly_sessions
+            },
+            "client_reports": reports,
+            "leaderboard": leaderboard
+        })
+

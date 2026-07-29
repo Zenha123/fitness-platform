@@ -16,6 +16,8 @@ import WeightJourneyPage from "./pages/WeightJourneyPage";
 import StrengthChartsPage from "./pages/StrengthChartsPage";
 import ReviewsFeedPage from "./pages/ReviewsFeedPage";
 
+import TrainerReportsPage from "./pages/TrainerReportsPage";
+
 export default function App() {
   return (
     <AuthProvider>
@@ -35,6 +37,7 @@ export default function App() {
           {/* Protected Trainer Routes */}
           <Route element={<ProtectedRoute allowedRoles={["trainer"]} />}>
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
+            <Route path="/trainer/reports" element={<TrainerReportsPage />} />
             <Route path="/trainer/clients/:id" element={<ClientProfileShell />} />
             <Route path="/trainer/exercises" element={<ExerciseLibraryPage />} />
             <Route path="/trainer/schedule" element={<ScheduleWorkoutPage />} />

@@ -47,7 +47,8 @@ class WeightEntrySerializer(serializers.ModelSerializer):
             return None
         request = self.context.get('request')
         if request:
-            return request.build_absolute_uri(f'/api/progress/photos/{obj.id}/')
+            from rest_framework.reverse import reverse
+            return reverse('private-photo', kwargs={'entry_id': obj.id}, request=request)
         return None
 
     def validate_weight_kg(self, value):
@@ -97,7 +98,8 @@ class WeightEntryListSerializer(serializers.ModelSerializer):
             return None
         request = self.context.get('request')
         if request:
-            return request.build_absolute_uri(f'/api/progress/photos/{obj.id}/')
+            from rest_framework.reverse import reverse
+            return reverse('private-photo', kwargs={'entry_id': obj.id}, request=request)
         return None
 
     def get_has_photo(self, obj):

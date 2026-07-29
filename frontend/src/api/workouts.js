@@ -78,5 +78,12 @@ export const workoutsApi = {
   deleteLog: async (id) => {
     const response = await api.delete(`/workouts/logs/${id}/`);
     return response.data;
+  },
+
+  // --- Reports & Leaderboards ---
+  getReports: async () => {
+    const response = await api.get('/workouts/reports/');
+    return response.data;
   }
 };
+

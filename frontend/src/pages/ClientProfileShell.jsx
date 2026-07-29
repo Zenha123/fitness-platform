@@ -16,6 +16,8 @@ import StrengthChart from "../components/progress/StrengthChart";
 import ReviewCard from "../components/reviews/ReviewCard";
 import ReviewForm from "../components/reviews/ReviewForm";
 
+import EditClientModal from "../components/clients/EditClientModal";
+
 export default function ClientProfileShell() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -24,9 +26,11 @@ export default function ClientProfileShell() {
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
+
 
   useEffect(() => {
     fetchClient();
@@ -101,26 +105,44 @@ export default function ClientProfileShell() {
             </div>
             
             <div className="flex-1 space-y-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl text-[var(--color-ink)] leading-tight">
-                  {client.name}
-                </h1>
-                <span className={`badge ${client.is_active ? 'badge-success' : 'badge-neutral'} rounded-md font-extrabold text-[10px]`}>
-                  {client.is_active ? 'Active' : 'Inactive'}
-                </span>
-                {client.needs_password_change && (
-                  <span className="badge badge-warning rounded-md font-extrabold text-[10px]">🔑 Pending Setup</span>
-                )}
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-2xl sm:text-3xl text-[var(--color-ink)] leading-tight">
+                    {client.name}
+                  </h1>
+                  <span className={`px-2.5 py-0.5 rounded-[var(--radius-md)] text-[10px] font-black uppercase tracking-wider ${client.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-neutral-100 text-[var(--color-steel)] border border-neutral-200'}`}>
+                    {client.is_active ? 'Active Roster' : 'Inactive'}
+                  </span>
+                  {client.needs_password_change && (
+                    <span className="px-2.5 py-0.5 rounded-[var(--radius-md)] text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">🔑 Pending Setup</span>
+                  )}
+                  {client.missed_sessions_flag && (
+                    <span className="px-2.5 py-0.5 rounded-[var(--radius-md)] text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">⚠️ Missed 2+ Sessions</span>
+                  )}
+                </div>
+
+                {/* Quick Actions Header */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link to={`/trainer/schedule?client=${client.id}`}>
+                    <Button variant="accent" size="sm">
+                      <PlusIcon className="w-4 h-4 text-white" />
+                      Schedule Workout
+                    </Button>
+                  </Link>
+                  <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
+                    Edit Profile
+                  </Button>
+                </div>
               </div>
               
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-neutral-500 font-semibold">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[var(--color-steel)] font-semibold">
                 <span className="flex items-center gap-1.5">
-                  <MailIcon className="w-4 h-4 text-neutral-400" />
+                  <MailIcon className="w-4 h-4 text-[var(--color-steel)]" />
                   {client.email}
                 </span>
                 <span className="hidden sm:inline text-neutral-300">•</span>
                 <span className="flex items-center gap-1.5">
-                  <CalendarIcon className="w-4 h-4 text-neutral-400" />
+                  <CalendarIcon className="w-4 h-4 text-[var(--color-steel)]" />
                   Joined {new Date(client.created_at).toLocaleDateString()}
                 </span>
               </div>
@@ -129,29 +151,30 @@ export default function ClientProfileShell() {
           
         </div>
 
-        {/* Navigation Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up" style={{ animationDelay: "100ms" }}>
+        {/* Navigation Cards (5-Tab System) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 animate-slide-up" style={{ animationDelay: "100ms" }}>
           {[
             { id: "overview", label: "Overview", icon: OverviewIcon },
             { id: "workouts", label: "Schedule", icon: CalendarIcon },
             { id: "progress", label: "Transformation", icon: ProgressIcon },
             { id: "reviews", label: "Coaching Notes", icon: ReviewIcon },
+            { id: "ask-coach", label: "Ask Coach", icon: ChatIcon },
           ].map(tab => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-5 flex flex-col items-center justify-center text-center gap-3 transition-all duration-200 ${
+                className={`bg-[var(--color-paper)] border rounded-[var(--radius-xl)] p-4 flex flex-col items-center justify-center text-center gap-2 transition-all duration-200 ${
                   isActive 
-                    ? `shadow-sm scale-[1.02] border-[var(--color-ink)]` 
-                    : "hover-lift hover:bg-black/5"
+                    ? `shadow-sm scale-[1.02] border-[var(--color-ink)] bg-white` 
+                    : "border-[var(--color-border)] hover:bg-black/5"
                 }`}
               >
-                <div className={`w-12 h-12 rounded-[var(--radius-md)] flex items-center justify-center ${isActive ? 'bg-[var(--color-ink)] text-white' : 'bg-black/5 text-[var(--color-steel)]'}`}>
-                  <tab.icon className="w-6 h-6" />
+                <div className={`w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center ${isActive ? 'bg-[var(--color-ink)] text-white' : 'bg-black/5 text-[var(--color-steel)]'}`}>
+                  <tab.icon className="w-5 h-5" />
                 </div>
-                <span className={`text-sm font-extrabold ${isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-steel)]'}`}>
+                <span className={`text-xs font-bold uppercase tracking-wider ${isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-steel)]'}`}>
                   {tab.label}
                 </span>
               </button>
@@ -162,7 +185,7 @@ export default function ClientProfileShell() {
         {/* Tab body content panels */}
         <div className="animate-slide-up" style={{ animationDelay: "150ms" }}>
           {activeTab === "overview" && (
-            <OverviewTab client={client} onUpdate={handleUpdate} />
+            <OverviewTab client={client} onUpdate={handleUpdate} onOpenEdit={() => setIsEditModalOpen(true)} />
           )}
           {activeTab === "workouts" && (
             <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-6">
@@ -175,7 +198,17 @@ export default function ClientProfileShell() {
           {activeTab === "reviews" && (
             <ReviewsTab clientId={client.id} clientName={client.name} />
           )}
+          {activeTab === "ask-coach" && (
+            <AskCoachPlaceholderTab />
+          )}
         </div>
+
+        <EditClientModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          client={client}
+          onClientUpdated={(updated) => setClient(updated)}
+        />
 
       </PageContainer>
     </TrainerLayout>
@@ -581,3 +614,39 @@ function MailIcon({ className }) {
     </svg>
   );
 }
+
+function ChatIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+  );
+}
+
+function PlusIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+  );
+}
+
+function AskCoachPlaceholderTab() {
+  return (
+    <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-10 flex flex-col items-center justify-center text-center py-16 shadow-sm">
+      <div className="w-16 h-16 rounded-[var(--radius-md)] bg-[var(--color-ink)] text-white flex items-center justify-center mb-5 shadow-sm">
+        <ChatIcon className="w-8 h-8" />
+      </div>
+      <h3 className="text-xl font-display text-[var(--color-ink)] uppercase tracking-wider mb-2">
+        Ask Coach — Direct Messaging
+      </h3>
+      <span className="px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-[var(--radius-full)] mb-4">
+        Coming Soon (Phase 6)
+      </span>
+      <p className="text-sm text-[var(--color-steel)] max-w-md leading-relaxed">
+        Direct messaging between trainers and clients will be available in Phase 6. In the meantime, use the <strong>Coaching Notes</strong> tab to post feedback and progress reviews.
+      </p>
+    </div>
+  );
+}
+

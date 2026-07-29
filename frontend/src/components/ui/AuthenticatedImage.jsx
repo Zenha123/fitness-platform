@@ -22,8 +22,18 @@ export default function AuthenticatedImage({ src, alt, className = "", style = {
         setLoading(true);
         setError(false);
         
+        // Format the request URL for axiosClient:
+        // - Absolute URLs (http:// or https://) are passed as-is to axiosClient (Axios sends them directly without prepending baseURL).
+        // - Relative paths starting with '/api/' have '/api' stripped so axiosClient prepends its configured baseURL without duplicating '/api'.
+        let requestUrl = src;
+        if (!/^https?:\/\//i.test(src)) {
+          if (src.startsWith("/api/")) {
+            requestUrl = src.slice(4);
+          }
+        }
+
         // Fetch as blob with auth headers (handled automatically by axiosClient)
-        const response = await api.get(src, { responseType: "blob" });
+        const response = await api.get(requestUrl, { responseType: "blob" });
         
         if (active) {
           objectUrl = URL.createObjectURL(response.data);

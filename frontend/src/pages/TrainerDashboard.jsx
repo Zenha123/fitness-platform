@@ -16,6 +16,11 @@ export default function TrainerDashboard() {
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Search, Filter & View state
+  const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all"); // 'all' | 'active' | 'pending' | 'flagged'
+  const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'table'
+
   useEffect(() => {
     fetchClients();
   }, []);
@@ -42,12 +47,26 @@ export default function TrainerDashboard() {
   const pendingClients = clients.filter(c => c.needs_password_change).length;
   const flaggedClients = clients.filter(c => c.missed_sessions_flag).length;
 
+  // Filtered client list based on search & tab filters
+  const filteredClients = clients.filter((client) => {
+    const matchesSearch =
+      client.name.toLowerCase().includes(search.toLowerCase()) ||
+      client.email.toLowerCase().includes(search.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    if (activeFilter === "active") return client.is_active;
+    if (activeFilter === "pending") return client.needs_password_change;
+    if (activeFilter === "flagged") return client.missed_sessions_flag;
+
+    return true;
+  });
+
   return (
     <TrainerLayout>
       <PageContainer variant="dashboard" className="space-y-8">
         {/* Welcome Hero Banner */}
-        <div className="relative overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--color-ink)] p-8 sm:p-10 text-white shadow-lg animate-slide-up">
-          {/* Subtle overlay decorative lines */}
+        <div className="relative overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--color-ink)] p-6 sm:p-10 text-white shadow-lg animate-slide-up">
           <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
           <div className="absolute top-[-50px] right-[-50px] w-64 h-64 rounded-full bg-white/5 blur-2xl" />
 
@@ -56,11 +75,11 @@ export default function TrainerDashboard() {
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-md)] bg-white/10 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-orange-300 border border-white/10">
                 ✨ Coach Workspace
               </span>
-              <h1 className="text-3xl sm:text-4xl mt-3 text-white">
-                Welcome back, {user?.name.split(" ")[0]}!
+              <h1 className="text-2xl sm:text-4xl mt-3 text-white">
+                Welcome back, {user?.name ? user.name.split(" ")[0] : "Coach"}!
               </h1>
-              <p className="text-white/70 mt-2 text-sm sm:text-base max-w-xl font-medium">
-                Keep your clients motivated, analyze their strength progression metrics, and design training plans to unlock their best.
+              <p className="text-white/70 mt-2 text-xs sm:text-base max-w-xl font-medium">
+                Manage your client roster, analyze workout logs, schedule training sessions, and track strength progression.
               </p>
             </div>
             <div className="flex-shrink-0">
@@ -68,7 +87,7 @@ export default function TrainerDashboard() {
                 variant="accent" 
                 size="lg" 
                 onClick={() => setIsModalOpen(true)}
-                className="shadow-lg hover:scale-105"
+                className="w-full sm:w-auto shadow-lg hover:scale-105"
               >
                 <PlusIcon className="w-5 h-5 text-white" />
                 Add New Client
@@ -78,86 +97,223 @@ export default function TrainerDashboard() {
         </div>
 
         {/* Metric Summary Widgets Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up" style={{ animationDelay: "100ms" }}>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 animate-slide-up" style={{ animationDelay: "100ms" }}>
           {/* Card 1 */}
-          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm hover-lift p-6 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-[var(--radius-md)] bg-black/5 text-[var(--color-ink)] border border-[var(--color-border)] flex items-center justify-center flex-shrink-0">
-              <UsersIcon className="w-7 h-7" />
+          <button
+            onClick={() => setActiveFilter("all")}
+            className={`text-left bg-[var(--color-paper)] border rounded-[var(--radius-xl)] shadow-sm hover-lift p-4 sm:p-6 flex items-center gap-4 sm:gap-5 transition-all ${
+              activeFilter === "all" ? "border-[var(--color-ink)] ring-2 ring-[var(--color-ink)]/10" : "border-[var(--color-border)]"
+            }`}
+          >
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-[var(--radius-md)] bg-black/5 text-[var(--color-ink)] border border-[var(--color-border)] flex items-center justify-center flex-shrink-0">
+              <UsersIcon className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <span className="block text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Total Clients</span>
-              <span className="text-3xl font-black text-[var(--color-ink)] leading-none">{loading ? "..." : totalClients}</span>
+              <span className="block text-[10px] sm:text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Total Clients</span>
+              <span className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] leading-none">{loading ? "..." : totalClients}</span>
             </div>
-          </div>
+          </button>
+
           {/* Card 2 */}
-          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm hover-lift p-6 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-[var(--radius-md)] bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center flex-shrink-0">
-              <ActiveIcon className="w-7 h-7" />
+          <button
+            onClick={() => setActiveFilter("active")}
+            className={`text-left bg-[var(--color-paper)] border rounded-[var(--radius-xl)] shadow-sm hover-lift p-4 sm:p-6 flex items-center gap-4 sm:gap-5 transition-all ${
+              activeFilter === "active" ? "border-emerald-500 ring-2 ring-emerald-500/10" : "border-[var(--color-border)]"
+            }`}
+          >
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-[var(--radius-md)] bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center flex-shrink-0">
+              <ActiveIcon className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <span className="block text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Active Roster</span>
-              <span className="text-3xl font-black text-[var(--color-ink)] leading-none">{loading ? "..." : activeClients}</span>
+              <span className="block text-[10px] sm:text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Active Roster</span>
+              <span className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] leading-none">{loading ? "..." : activeClients}</span>
             </div>
-          </div>
+          </button>
+
           {/* Card 3 */}
-          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm hover-lift p-6 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-[var(--radius-md)] bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center flex-shrink-0">
-              <SetupIcon className="w-7 h-7" />
+          <button
+            onClick={() => setActiveFilter("pending")}
+            className={`text-left bg-[var(--color-paper)] border rounded-[var(--radius-xl)] shadow-sm hover-lift p-4 sm:p-6 flex items-center gap-4 sm:gap-5 transition-all ${
+              activeFilter === "pending" ? "border-amber-500 ring-2 ring-amber-500/10" : "border-[var(--color-border)]"
+            }`}
+          >
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-[var(--radius-md)] bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center flex-shrink-0">
+              <SetupIcon className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <span className="block text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Pending Setup</span>
-              <span className="text-3xl font-black text-[var(--color-ink)] leading-none">{loading ? "..." : pendingClients}</span>
+              <span className="block text-[10px] sm:text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Pending Setup</span>
+              <span className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] leading-none">{loading ? "..." : pendingClients}</span>
             </div>
-          </div>
+          </button>
+
           {/* Card 4 */}
-          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-sm hover-lift p-6 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-[var(--radius-md)] bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center flex-shrink-0">
-              <AlertCircleIcon className="w-7 h-7" />
+          <button
+            onClick={() => setActiveFilter("flagged")}
+            className={`text-left bg-[var(--color-paper)] border rounded-[var(--radius-xl)] shadow-sm hover-lift p-4 sm:p-6 flex items-center gap-4 sm:gap-5 transition-all ${
+              activeFilter === "flagged" ? "border-rose-500 ring-2 ring-rose-500/10" : "border-[var(--color-border)]"
+            }`}
+          >
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-[var(--radius-md)] bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center flex-shrink-0">
+              <AlertCircleIcon className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <span className="block text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Missed Alerts</span>
-              <span className="text-3xl font-black text-rose-600 leading-none">{loading ? "..." : flaggedClients}</span>
+              <span className="block text-[10px] sm:text-[11px] font-bold text-[var(--color-steel)] uppercase tracking-widest mb-1">Missed Alerts</span>
+              <span className="text-2xl sm:text-3xl font-black text-rose-600 leading-none">{loading ? "..." : flaggedClients}</span>
             </div>
-          </div>
+          </button>
         </div>
 
         {error && <Alert variant="danger" className="mb-6">{error}</Alert>}
 
-        {/* Client Grid Header */}
-        <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
-          <h2 className="text-xl text-[var(--color-ink)] flex items-center gap-2">
-            <span>Roster Database</span>
-            <span className="text-xs bg-black/5 border border-[var(--color-border)] text-[var(--color-ink)] font-bold px-2 py-0.5 rounded-[var(--radius-md)]">
-              {clients.length}
-            </span>
-          </h2>
+        {/* Search, Filter Toolbar & View Switcher */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--color-border)] pb-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl text-[var(--color-ink)] flex items-center gap-2">
+              <span>Client Roster</span>
+              <span className="text-xs bg-black/5 border border-[var(--color-border)] text-[var(--color-ink)] font-bold px-2 py-0.5 rounded-[var(--radius-md)]">
+                {filteredClients.length}
+              </span>
+            </h2>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1 sm:w-64">
+              <input
+                type="text"
+                placeholder="Search roster..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]/20 focus:border-[var(--color-ink)]"
+              />
+              <SearchIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-steel)]" />
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex items-center bg-black/5 p-1 rounded-[var(--radius-md)] border border-[var(--color-border)]">
+              {[
+                { id: "all", label: "All" },
+                { id: "active", label: "Active" },
+                { id: "pending", label: "Pending" },
+                { id: "flagged", label: "Alerts" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveFilter(tab.id)}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-[var(--radius-sm)] transition-all ${
+                    activeFilter === tab.id
+                      ? "bg-white text-[var(--color-ink)] shadow-xs"
+                      : "text-[var(--color-steel)] hover:text-[var(--color-ink)]"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* View Switcher Toggle */}
+            <div className="hidden sm:flex items-center bg-black/5 p-1 rounded-[var(--radius-md)] border border-[var(--color-border)]">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-1 rounded-[var(--radius-sm)] ${viewMode === "grid" ? "bg-white text-[var(--color-ink)] shadow-xs" : "text-[var(--color-steel)]"}`}
+                aria-label="Grid View"
+              >
+                <GridIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("table")}
+                className={`p-1 rounded-[var(--radius-sm)] ${viewMode === "table" ? "bg-white text-[var(--color-ink)] shadow-xs" : "text-[var(--color-steel)]"}`}
+                aria-label="Table View"
+              >
+                <TableIcon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Client Cards List */}
+        {/* Client Roster Display */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((n) => (
               <div key={n} className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] h-48 skeleton p-5" />
             ))}
           </div>
-        ) : clients.length === 0 ? (
+        ) : filteredClients.length === 0 ? (
           <div className="bg-[var(--color-paper)] border border-[var(--color-border)] shadow-sm rounded-[var(--radius-xl)] p-10 flex flex-col items-center justify-center text-center py-16">
             <div className="w-16 h-16 rounded-[var(--radius-md)] bg-black/5 border border-[var(--color-border)] text-[var(--color-ink)] flex items-center justify-center mb-5">
               <UsersIcon className="w-8 h-8" />
             </div>
-            <h3 className="text-lg text-[var(--color-ink)] mb-2">No active clients</h3>
+            <h3 className="text-lg text-[var(--color-ink)] mb-2">No matching clients found</h3>
             <p className="text-sm text-[var(--color-steel)] max-w-sm leading-relaxed mb-6">
-              Get started by adding your first client to your list. They will receive credentials immediately.
+              {search || activeFilter !== "all"
+                ? "Try adjusting your search query or filter tab."
+                : "Get started by adding your first client to your list. They will receive login credentials."}
             </p>
-            <Button variant="outline" onClick={() => setIsModalOpen(true)}>
-              Register Client
+            <Button variant="outline" onClick={() => { setSearch(""); setActiveFilter("all"); setIsModalOpen(true); }}>
+              Add New Client
             </Button>
           </div>
-        ) : (
+        ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up" style={{ animationDelay: "200ms" }}>
-            {clients.map((client) => (
+            {filteredClients.map((client) => (
               <ClientCard key={client.id} client={client} />
             ))}
+          </div>
+        ) : (
+          /* Table View */
+          <div className="bg-[var(--color-paper)] border border-[var(--color-border)] rounded-[var(--radius-xl)] overflow-x-auto shadow-sm">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-[var(--color-border)] bg-black/5 text-[10px] font-bold text-[var(--color-steel)] uppercase tracking-wider">
+                  <th className="py-3 px-4">Client Name</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Last Completed Session</th>
+                  <th className="py-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border)]">
+                {filteredClients.map((client) => (
+                  <tr key={client.id} className="hover:bg-black/5 transition-colors">
+                    <td className="py-3 px-4 font-bold text-[var(--color-ink)]">
+                      <Link to={`/trainer/clients/${client.id}`} className="hover:underline">
+                        {client.name}
+                      </Link>
+                      <span className="block text-xs font-normal text-[var(--color-steel)]">{client.email}</span>
+                    </td>
+                    <td className="py-3 px-4">
+                      {client.missed_sessions_flag ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-extrabold text-rose-600 bg-rose-50 border border-rose-200 rounded-md">
+                          <AlertCircleIcon className="w-3 h-3" /> Missed Alerts
+                        </span>
+                      ) : client.needs_password_change ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-extrabold text-amber-600 bg-amber-50 border border-amber-200 rounded-md">
+                          🔑 Pending Setup
+                        </span>
+                      ) : client.is_active ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-md">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-extrabold text-[var(--color-steel)] bg-neutral-100 border border-neutral-200 rounded-md">
+                          Inactive
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-xs text-[var(--color-ink)] font-medium">
+                      {client.last_completed_workout || "None yet"}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <Link
+                        to={`/trainer/clients/${client.id}`}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-ink)] hover:text-[var(--color-signal)]"
+                      >
+                        View Profile &rarr;
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </PageContainer>
@@ -301,3 +457,28 @@ function AlertCircleIcon({ className }) {
     </svg>
   );
 }
+
+function SearchIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+  );
+}
+
+function GridIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+    </svg>
+  );
+}
+
+function TableIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+    </svg>
+  );
+}
+

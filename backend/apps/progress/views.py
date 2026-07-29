@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth import get_user_model
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponseForbidden
 from django.db.models import Max
 from apps.clients.views import IsTrainer
 from apps.clients.models import TrainerClientLink
@@ -103,16 +103,22 @@ class PrivatePhotoView(APIView):
         user = request.user
         # Check access: client owns it OR trainer is assigned to that client
         if user.role == 'client' and entry.client != user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return HttpResponseForbidden()
         if user.role == 'trainer':
             if not TrainerClientLink.objects.filter(trainer=user, client=entry.client).exists():
-                return Response(status=status.HTTP_403_FORBIDDEN)
+                return HttpResponseForbidden()
 
         if not entry.photo:
             raise Http404
 
+        # Detect content type from the actual file extension
+        import mimetypes
+        content_type, _ = mimetypes.guess_type(entry.photo.name)
+        if not content_type or not content_type.startswith('image/'):
+            content_type = 'image/jpeg'  # safe fallback
+
         try:
-            return FileResponse(entry.photo.open('rb'), content_type='image/jpeg')
+            return FileResponse(entry.photo.open('rb'), content_type=content_type)
         except FileNotFoundError:
             raise Http404
 

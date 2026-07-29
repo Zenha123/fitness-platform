@@ -60,6 +60,12 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     setLoading(true);
+    // Clear any stale tokens from a previous session BEFORE the login request.
+    // This prevents a race condition where an in-flight 401 retry (using the old
+    // blacklisted refresh token) fires clearTokens() and wipes the brand-new
+    // tokens that login() just stored, causing the first post-login request to 401.
+    clearTokens();
+    localStorage.removeItem(USER_KEY);
     try {
       const response = await axiosClient.post("/auth/login/", { email, password });
       const { access, refresh, user: userData } = response.data;
