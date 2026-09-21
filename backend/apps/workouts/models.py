@@ -124,6 +124,7 @@ class WorkoutLog(models.Model):
     )
     date = models.DateField(help_text="Date the workout was actually performed")
     notes = models.TextField(blank=True, null=True, help_text="Optional client note, e.g. 'felt heavy'")
+    duration_seconds = models.PositiveIntegerField(default=0, help_text="Elapsed session duration in seconds")
     completed = models.BooleanField(default=False, help_text="True once the client marks the session done")
     logged_at = models.DateTimeField(auto_now_add=True)
 
@@ -158,3 +159,26 @@ class WorkoutLogEntry(models.Model):
 
     def __str__(self):
         return f"{self.exercise.name} actuals for {self.workout_log.client.name}"
+
+
+class WorkoutLogSet(models.Model):
+    """An individual recorded set within a workout log entry."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    entry = models.ForeignKey(
+        WorkoutLogEntry,
+        on_delete=models.CASCADE,
+        related_name='sets'
+    )
+    set_index = models.PositiveIntegerField()
+    prescribed_reps = models.CharField(max_length=50, blank=True, null=True)
+    prescribed_weight_kg = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    actual_reps = models.PositiveIntegerField(null=True, blank=True)
+    actual_weight_kg = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    completed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['set_index']
+
+    def __str__(self):
+        return f"Set {self.set_index} of {self.entry.exercise.name}"
+

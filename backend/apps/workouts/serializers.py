@@ -3,7 +3,7 @@ from apps.exercises.serializers import ExerciseSerializer
 from .models import (
     WorkoutPlan, WorkoutPlanExercise, 
     WorkoutTemplate, WorkoutTemplateExercise,
-    WorkoutLog, WorkoutLogEntry
+    WorkoutLog, WorkoutLogEntry,WorkoutLogSet
 )
 
 # ──────────────────────────────────────────
@@ -154,16 +154,27 @@ class WorkoutTemplateListSerializer(serializers.ModelSerializer):
 # Workout Log Serializers
 # ──────────────────────────────────────────
 
+class WorkoutLogSetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkoutLogSet
+        fields = [
+            'id', 'set_index', 'prescribed_reps', 'prescribed_weight_kg',
+            'actual_reps', 'actual_weight_kg', 'completed'
+        ]
+        read_only_fields = ['id']
+
+
 class WorkoutLogEntrySerializer(serializers.ModelSerializer):
     exercise_name = serializers.CharField(source='exercise.name', read_only=True)
     exercise_category = serializers.CharField(source='exercise.category', read_only=True)
     exercise_demo_link = serializers.CharField(source='exercise.demo_link', read_only=True, allow_null=True)
+    sets = WorkoutLogSetSerializer(many=True, required=False)
 
     class Meta:
         model = WorkoutLogEntry
         fields = [
             'id', 'exercise', 'exercise_name', 'exercise_category', 'exercise_demo_link',
-            'actual_sets', 'actual_reps', 'actual_weight_kg', 'order', 'notes'
+            'actual_sets', 'actual_reps', 'actual_weight_kg', 'order', 'notes', 'sets'
         ]
         read_only_fields = ['id']
 
@@ -176,7 +187,7 @@ class WorkoutLogSerializer(serializers.ModelSerializer):
         model = WorkoutLog
         fields = [
             'id', 'client', 'plan', 'plan_title', 'date',
-            'notes', 'completed', 'entries', 'logged_at'
+            'notes', 'duration_seconds', 'completed', 'entries', 'logged_at'
         ]
         read_only_fields = ['id', 'client', 'logged_at']
 
@@ -188,7 +199,7 @@ class WorkoutLogCreateUpdateSerializer(serializers.ModelSerializer):
         model = WorkoutLog
         fields = [
             'id', 'client', 'plan', 'date',
-            'notes', 'completed', 'entries', 'logged_at'
+            'notes', 'duration_seconds', 'completed', 'entries', 'logged_at'
         ]
         read_only_fields = ['id', 'client', 'logged_at']
 
@@ -196,8 +207,24 @@ class WorkoutLogCreateUpdateSerializer(serializers.ModelSerializer):
         entries_data = validated_data.pop('entries', [])
         log = WorkoutLog.objects.create(**validated_data)
         for idx, entry_data in enumerate(entries_data):
+            sets_data = entry_data.pop('sets', [])
             entry_data['order'] = entry_data.get('order', idx)
-            WorkoutLogEntry.objects.create(workout_log=log, **entry_data)
+            
+            # Derive top-level fallback fields if sets are provided
+            if sets_data:
+                entry_data['actual_sets'] = len(sets_data)
+                # Max weight recorded or first set weight
+                weights = [s['actual_weight_kg'] for s in sets_data if s.get('actual_weight_kg') is not None]
+                if weights:
+                    entry_data['actual_weight_kg'] = max(weights)
+                reps_list = [str(s['actual_reps']) for s in sets_data if s.get('actual_reps') is not None]
+                if reps_list:
+                    entry_data['actual_reps'] = ", ".join(reps_list)
+
+            entry = WorkoutLogEntry.objects.create(workout_log=log, **entry_data)
+            for s_idx, set_data in enumerate(sets_data):
+                set_data['set_index'] = set_data.get('set_index', s_idx + 1)
+                WorkoutLogSet.objects.create(entry=entry, **set_data)
         return log
 
     def update(self, instance, validated_data):
@@ -210,7 +237,22 @@ class WorkoutLogCreateUpdateSerializer(serializers.ModelSerializer):
         if entries_data is not None:
             instance.entries.all().delete()
             for idx, entry_data in enumerate(entries_data):
+                sets_data = entry_data.pop('sets', [])
                 entry_data['order'] = entry_data.get('order', idx)
-                WorkoutLogEntry.objects.create(workout_log=instance, **entry_data)
+
+                if sets_data:
+                    entry_data['actual_sets'] = len(sets_data)
+                    weights = [s['actual_weight_kg'] for s in sets_data if s.get('actual_weight_kg') is not None]
+                    if weights:
+                        entry_data['actual_weight_kg'] = max(weights)
+                    reps_list = [str(s['actual_reps']) for s in sets_data if s.get('actual_reps') is not None]
+                    if reps_list:
+                        entry_data['actual_reps'] = ", ".join(reps_list)
+
+                entry = WorkoutLogEntry.objects.create(workout_log=instance, **entry_data)
+                for s_idx, set_data in enumerate(sets_data):
+                    set_data['set_index'] = set_data.get('set_index', s_idx + 1)
+                    WorkoutLogSet.objects.create(entry=entry, **set_data)
 
         return instance
+

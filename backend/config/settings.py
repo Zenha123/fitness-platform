@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.workouts",
     "apps.progress",
     "apps.reviews",
+    "apps.bookings",
 ]
 
 MIDDLEWARE = [
@@ -136,11 +137,23 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
+# Store datetimes in UTC; TRAINER_TIMEZONE is used for booking/availability display.
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_TZ = True
+
+# Phase 1 Task 1 — confirmed platform decisions (override via .env)
+TRAINER_TIMEZONE = config("TRAINER_TIMEZONE", default="Asia/Kolkata").strip()
+FRONTEND_BASE_URL = config("FRONTEND_BASE_URL", default="http://localhost:5173").strip().rstrip("/")
+VIDEO_PROVIDER = config("VIDEO_PROVIDER", default="zoom").strip().lower()  # zoom | google_meet
+EMAIL_PROVIDER = config("EMAIL_PROVIDER", default="console").strip().lower()  # console | sendgrid
+
+# Optional Zoom API credentials (used when VIDEO_PROVIDER=zoom and credentials are set)
+ZOOM_ACCOUNT_ID = config("ZOOM_ACCOUNT_ID", default="").strip()
+ZOOM_CLIENT_ID = config("ZOOM_CLIENT_ID", default="").strip()
+ZOOM_CLIENT_SECRET = config("ZOOM_CLIENT_SECRET", default="").strip()
 
 
 
@@ -198,5 +211,34 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
     default="http://localhost:5173",
-    cast=lambda v: [s.strip() for s in v.split(",")],
+    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
 )
+
+# Ensure the public frontend origin is always allowed for CORS (Task 2)
+if FRONTEND_BASE_URL and FRONTEND_BASE_URL not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS = [*CORS_ALLOWED_ORIGINS, FRONTEND_BASE_URL]
+
+# Transactional email (Phase 1 Task 1–2)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@haqqathlete.com").strip()
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+# Optional override for trainer booking alerts (defaults to booking.trainer.email)
+TRAINER_NOTIFY_EMAIL = config("TRAINER_NOTIFY_EMAIL", default="").strip()
+BOOKING_CANCELLATION_POLICY = config(
+    "BOOKING_CANCELLATION_POLICY",
+    default=(
+        "Please cancel or reschedule at least 24 hours before your session by "
+        "replying to this email. Late cancellations may forfeit the session."
+    ),
+).strip()
+
+if EMAIL_PROVIDER == "sendgrid":
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = config("EMAIL_HOST", default="smtp.sendgrid.net")
+    EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+    EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+    EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="apikey")
+    EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+    EMAIL_TIMEOUT = config("EMAIL_TIMEOUT", default=20, cast=int)
+else:
+    # Local/dev: print emails to the runserver console
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

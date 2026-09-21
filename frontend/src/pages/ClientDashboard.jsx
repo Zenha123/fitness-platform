@@ -4,14 +4,17 @@ import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/Button";
 import WorkoutCalendar from "../components/workouts/WorkoutCalendar";
 import { workoutsApi } from "../api/workouts";
+import { getClientBookings } from "../api/bookings";
 import { Spinner } from "../components/ui/Spinner";
 import ClientLayout from "../components/layout/ClientLayout";
 import PageContainer from "../components/layout/PageContainer";
+
 export default function ClientDashboard() {
   const { user } = useAuth();
   
   const [todayPlan, setTodayPlan] = useState(null);
   const [todayLog, setTodayLog] = useState(null);
+  const [myBookings, setMyBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,9 +27,10 @@ export default function ClientDashboard() {
       const today = new Date().toISOString().split('T')[0];
       const monthStr = today.substring(0, 7);
       
-      const [plansData, logsData] = await Promise.all([
+      const [plansData, logsData, bookingsData] = await Promise.all([
         workoutsApi.getPlans({ month: monthStr }),
-        workoutsApi.getLogs({ month: monthStr })
+        workoutsApi.getLogs({ month: monthStr }),
+        getClientBookings().catch(() => [])
       ]);
       
       const plan = plansData.find(p => p.scheduled_date === today);
@@ -34,6 +38,8 @@ export default function ClientDashboard() {
       
       if (plan) setTodayPlan(plan);
       if (log) setTodayLog(log);
+      const bList = Array.isArray(bookingsData) ? bookingsData : (bookingsData?.results || []);
+      setMyBookings(bList);
     } catch (error) {
       console.error("Failed to fetch today's workout", error);
     } finally {
@@ -61,8 +67,69 @@ export default function ClientDashboard() {
                 Welcome back to your personalized training space. Access your schedule, track metrics, log sets, and see your stats grow.
               </p>
             </div>
+            <div>
+              <Link to="/book">
+                <Button variant="primary" className="shadow-lg whitespace-nowrap">
+                  Book 1-on-1 Call 📅
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
+
+        {/* Bookings & Appointments Widget */}
+        {myBookings.length > 0 && (
+          <div className="rounded-[var(--radius-xl)] bg-[var(--color-ink)] border border-white/10 p-6 text-white space-y-4 shadow-md">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <span>🗓️</span> Upcoming Coaching Calls & Consultations
+              </h2>
+              <Link to="/book" className="text-xs font-semibold text-blue-400 hover:text-blue-300">
+                + Book Another Call
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {myBookings.map((b) => (
+                <div key={b.id} className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">
+                      {b.service_details?.title || "Coaching Session"}
+                    </span>
+                    <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      {b.status}
+                    </span>
+                  </div>
+
+                  <div className="text-sm font-semibold text-white">
+                    {new Date(b.start_time).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    {b.meeting_link && (
+                      <a
+                        href={b.meeting_link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+                      >
+                        Join Call 🎥
+                      </a>
+                    )}
+                    {b.intake_token && (
+                      <Link
+                        to={`/intake/${b.intake_token}`}
+                        className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
+                      >
+                        {b.intake_submission ? "View Intake 📋" : "Fill Intake Form 📋"}
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Today's Workout Widget */}
         {(() => {

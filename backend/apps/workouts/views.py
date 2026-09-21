@@ -129,7 +129,7 @@ class WorkoutLogViewSet(viewsets.ModelViewSet):
             except (ValueError, AttributeError):
                 pass
                 
-        return qs.select_related('plan').prefetch_related('entries__exercise').order_by('-date', '-logged_at')
+        return qs.select_related('plan').prefetch_related('entries__exercise', 'entries__sets').order_by('-date', '-logged_at')
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:

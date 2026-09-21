@@ -1,3 +1,2 @@
-from django.test import TestCase
+# Tests for workouts app
 
-# Create your tests here.

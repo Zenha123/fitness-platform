@@ -30,3 +30,22 @@ class WorkoutTemplateAdmin(admin.ModelAdmin):
     search_fields = ('title', 'trainer__name')
     ordering = ('-created_at',)
     inlines = [WorkoutTemplateExerciseInline]
+
+
+from .models import WorkoutLog, WorkoutLogEntry, WorkoutLogSet
+
+class WorkoutLogSetInline(admin.TabularInline):
+    model = WorkoutLogSet
+    extra = 0
+
+class WorkoutLogEntryInline(admin.TabularInline):
+    model = WorkoutLogEntry
+    extra = 0
+
+@admin.register(WorkoutLog)
+class WorkoutLogAdmin(admin.ModelAdmin):
+    list_display = ('client', 'date', 'completed', 'duration_seconds', 'logged_at')
+    list_filter = ('completed', 'date')
+    search_fields = ('client__name',)
+    inlines = [WorkoutLogEntryInline]
+
