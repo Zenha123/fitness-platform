@@ -2,12 +2,13 @@ import React from "react";
 import { Spinner } from "./Spinner";
 
 const variants = {
-  primary: "bg-[var(--color-ink)] text-white hover:bg-[var(--color-primary-hover)] active:translate-y-px",
-  secondary: "border-2 border-[var(--color-steel-light)] text-[var(--color-ink)] hover:border-[var(--color-ink)] hover:bg-black/5",
-  accent: "bg-[var(--color-signal)] text-white hover:bg-[var(--color-signal-hover)] active:translate-y-px shadow-sm shadow-[var(--color-signal)]/20",
-  ghost: "text-[var(--color-steel)] hover:text-[var(--color-ink)] hover:bg-black/5",
-  destructive: "bg-rose-500 text-white hover:bg-rose-600 active:translate-y-px",
+  primary: "bg-[var(--color-signal)] text-white hover:bg-[var(--color-signal-hover)] active:translate-y-px shadow-md shadow-[var(--color-signal)]/20",
+  secondary: "border-2 border-[var(--color-steel-light)] text-white hover:border-white hover:bg-white/10",
+  accent: "bg-[var(--color-signal)] text-white hover:bg-[var(--color-signal-hover)] active:translate-y-px shadow-md shadow-[var(--color-signal)]/20",
+  ghost: "text-[var(--color-steel)] hover:text-white hover:bg-white/10",
+  destructive: "bg-rose-600 text-white hover:bg-rose-700 active:translate-y-px shadow-md shadow-rose-600/20",
 };
+
 
 const sizes = {
   sm: "px-3 py-1.5 text-sm rounded-[var(--radius-sm)]",

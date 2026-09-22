@@ -71,3 +71,34 @@ export const getClientBookings = async () => {
   const response = await API.get("/bookings/client/my-bookings/");
   return response.data.results || response.data;
 };
+
+// Assessment Report API (§5.7)
+export const saveAssessmentReport = async (reportData) => {
+  const response = await API.post("/bookings/reports/save/", reportData);
+  return response.data;
+};
+
+export const releaseAssessmentReport = async (reportId) => {
+  const response = await API.post(`/bookings/reports/${reportId}/release/`);
+  return response.data;
+};
+
+export const getAssessmentReportPdfUrl = (reportId, token = null) => {
+  const baseURL = API.defaults.baseURL || "http://localhost:8000/api";
+  let url = `${baseURL}/bookings/reports/${reportId}/pdf/`;
+  if (token) url += `?token=${token}`;
+  return url;
+};
+
+/**
+ * Securely downloads/opens the assessment report PDF using the authenticated
+ * axios client (sends JWT in Authorization header). Returns a temporary blob URL.
+ */
+export const downloadAssessmentReportPdf = async (reportId) => {
+  const response = await API.get(`/bookings/reports/${reportId}/pdf/`, {
+    responseType: "blob",
+  });
+  const blob = new Blob([response.data], { type: "application/pdf" });
+  const blobUrl = URL.createObjectURL(blob);
+  return blobUrl;
+};

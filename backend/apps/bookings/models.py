@@ -136,7 +136,41 @@ class IntakeFormSubmission(models.Model):
     )
     form_type = models.CharField(max_length=50)  # coaching_intake or consultation_intake
     responses = models.JSONField(default=dict)
+    has_risk_flags = models.BooleanField(default=False)
+    risk_flags = models.JSONField(default=list, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
+class AssessmentReport(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    booking = models.OneToOneField(
+        Booking,
+        on_delete=models.CASCADE,
+        related_name='assessment_report'
+    )
+    trainer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='trainer_assessment_reports',
+        limit_choices_to={'role': 'trainer'}
+    )
+    client_name = models.CharField(max_length=255)
+    client_email = models.EmailField()
+
+    goals_summary = models.TextField(help_text="Client goals summary & target objectives.")
+    baseline_assessment = models.TextField(help_text="Current baseline assessment, posture, fitness level, PAR-Q findings.")
+    recommended_program = models.TextField(help_text="Recommended program direction, training frequency, protocols.")
+    suggested_timeline = models.TextField(help_text="Suggested timeline, milestones, and evaluation dates.")
+    trainer_notes = models.TextField(blank=True, default="", help_text="Additional notes or advisory from trainer.")
+
+    pdf_file = models.FileField(upload_to='assessment_reports/', blank=True, null=True)
+    is_released = models.BooleanField(default=False, help_text="Whether report is released and emailed to client.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
-        return f"Intake for Booking {self.booking.id} ({self.form_type})"
+        return f"Assessment Report for {self.client_name} (Booking {self.booking.id})"
+
+

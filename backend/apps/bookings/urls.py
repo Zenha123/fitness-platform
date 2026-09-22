@@ -8,7 +8,10 @@ from .views import (
     TrainerAvailabilityViewSet,
     TrainerBlackoutViewSet,
     TrainerBookingViewSet,
-    ClientBookingListView
+    ClientBookingListView,
+    AssessmentReportCreateUpdateView,
+    AssessmentReportReleaseView,
+    AssessmentReportPDFDownloadView,
 )
 
 router = DefaultRouter()
@@ -17,11 +20,16 @@ router.register(r'trainer/blackouts', TrainerBlackoutViewSet, basename='trainer-
 router.register(r'trainer/manage-bookings', TrainerBookingViewSet, basename='trainer-bookings')
 
 urlpatterns = [
-    # Public endpoints
+    # Public & Intake endpoints
     path('services/', BookingServiceListView.as_view(), name='booking-services'),
     path('available-slots/', AvailableSlotsView.as_view(), name='available-slots'),
     path('create/', CreateBookingView.as_view(), name='create-booking'),
     path('intake/<uuid:token>/', IntakeFormView.as_view(), name='intake-form'),
+
+    # Assessment Report endpoints (§5.7)
+    path('reports/save/', AssessmentReportCreateUpdateView.as_view(), name='save-assessment-report'),
+    path('reports/<uuid:report_id>/release/', AssessmentReportReleaseView.as_view(), name='release-assessment-report'),
+    path('reports/<uuid:report_id>/pdf/', AssessmentReportPDFDownloadView.as_view(), name='download-assessment-report-pdf'),
 
     # Authenticated client endpoint
     path('client/my-bookings/', ClientBookingListView.as_view(), name='client-bookings'),

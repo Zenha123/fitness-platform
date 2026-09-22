@@ -108,9 +108,9 @@
     "semantic_hash": ""
   },
   "backend/apps/bookings/services.py": {
-    "mtime": 1789996374.2401373,
-    "seen": 1789996748.80166,
-    "ast_hash": "ea589677af8ddfa651b7ccde3d471a4c",
+    "mtime": 1790011491.0224996,
+    "seen": 1790011811.6566517,
+    "ast_hash": "bdeafa6765d8ac0d88b2311e96da6f80",
     "semantic_hash": ""
   },
   "backend/apps/bookings/urls.py": {
@@ -120,9 +120,9 @@
     "semantic_hash": "40cfc005e47fdc1525535fe333d6596d"
   },
   "backend/apps/bookings/views.py": {
-    "mtime": 1789996380.7317317,
-    "seen": 1789996748.8016691,
-    "ast_hash": "c028456bf19acee49abf81b685160326",
+    "mtime": 1790011491.3282647,
+    "seen": 1790011811.656667,
+    "ast_hash": "85132579e827f608380b7ad9004cbb9b",
     "semantic_hash": ""
   },
   "backend/apps/clients/__init__.py": {
@@ -786,9 +786,9 @@
     "semantic_hash": "842742aa2893548a1046b5515d083e6e"
   },
   "frontend/src/pages/PublicBookingPage.jsx": {
-    "mtime": 1789977041.9681218,
-    "seen": 1789977229.6881077,
-    "ast_hash": "ef5b8197d2d3e60a2faad45fb2d02ad4",
+    "mtime": 1790011542.7786765,
+    "seen": 1790011811.6572552,
+    "ast_hash": "e4b343ac058c7572f5ba7804fad23147",
     "semantic_hash": ""
   },
   "frontend/src/pages/RegisterPage.jsx": {
@@ -987,6 +987,12 @@
     "mtime": 1789996355.4995291,
     "seen": 1789996748.8016422,
     "ast_hash": "259e9e1f7d11c38b2642ba82c11a1f42",
+    "semantic_hash": ""
+  },
+  "backend/apps/bookings/tests.py": {
+    "mtime": 1790011603.9771836,
+    "seen": 1790011811.6566575,
+    "ast_hash": "54d86d5115ef7fb81796f5b76aae092e",
     "semantic_hash": ""
   }
 }

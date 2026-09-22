@@ -119,21 +119,21 @@ export default function PublicBookingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-white">
+    <div className="min-h-screen bg-[#0B0B0C] text-white">
       <Navbar />
 
-      <PageContainer variant="narrow" className="space-y-6 py-6 sm:space-y-8 sm:py-8">
+      <PageContainer variant="narrow" className="space-y-4 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-8">
         {/* Header Hero Section */}
-        <div className="relative overflow-hidden rounded-[var(--radius-2xl)] border border-white/10 bg-[var(--color-ink)] p-5 text-center text-white shadow-xl sm:p-8">
+        <div className="relative overflow-hidden rounded-[var(--radius-2xl)] border border-white/10 bg-white/5 p-4 text-center text-white shadow-xl sm:p-8">
           <div className="pointer-events-none absolute inset-0 bg-grid-pattern opacity-10" />
           <div className="relative z-10 space-y-2">
-            <span className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[var(--color-signal)] backdrop-blur-md">
+            <span className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-signal)]/30 bg-[var(--color-signal)]/15 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[var(--color-signal)] backdrop-blur-md">
               Haqq Athlete Coaching & Consultation
             </span>
             <h1 className="text-2xl font-black text-white sm:text-3xl md:text-4xl">
               Book Your 1-on-1 Session
             </h1>
-            <p className="mx-auto max-w-lg text-sm font-medium text-white/70 sm:text-base">
+            <p className="mx-auto max-w-lg text-xs font-medium text-white/70 sm:text-base">
               Select your service, choose your local time slot, and lock in your appointment instantly.
             </p>
           </div>
@@ -146,16 +146,16 @@ export default function PublicBookingPage() {
             <Spinner size="lg" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
             {/* Step 1: Service & Slot Selector */}
-            <div className="space-y-6 rounded-[var(--radius-2xl)] border border-white/10 bg-[var(--color-ink)] p-5 shadow-lg sm:p-8">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3">
-                <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 text-xs flex items-center justify-center font-black">1</span>
+            <div className="space-y-5 rounded-[var(--radius-2xl)] border border-white/10 bg-white/5 p-4 shadow-lg sm:p-6 md:p-8">
+              <h2 className="text-lg font-bold text-white sm:text-xl flex items-center gap-2 border-b border-white/10 pb-3">
+                <span className="w-6 h-6 rounded-full bg-[var(--color-signal)]/20 text-[var(--color-signal)] text-xs flex items-center justify-center font-black border border-[var(--color-signal)]/30">1</span>
                 Select Service & Time Slot
               </h2>
 
               {/* Service Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 {services.map((srv) => {
                   const isSelected = selectedService?.id === srv.id;
                   return (
@@ -163,14 +163,14 @@ export default function PublicBookingPage() {
                       key={srv.id}
                       type="button"
                       onClick={() => setSelectedService(srv)}
-                      className={`p-4 rounded-xl border text-left transition-all ${
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
                         isSelected
-                          ? "border-blue-500 bg-blue-500/15 text-white shadow-lg"
+                          ? "border-[var(--color-signal)] bg-[var(--color-signal)]/20 text-white shadow-md ring-1 ring-[var(--color-signal)]"
                           : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
                       }`}
                     >
                       <div className="font-bold text-sm text-white">{srv.title}</div>
-                      <div className="text-xs text-blue-400 font-semibold mt-1">
+                      <div className="text-xs text-[var(--color-signal)] font-semibold mt-1">
                         ⏱️ {srv.duration_minutes} Minutes
                       </div>
                     </button>
@@ -179,13 +179,13 @@ export default function PublicBookingPage() {
               </div>
 
               {selectedService && (
-                <p className="text-xs text-white/60 bg-white/5 p-3 rounded-lg border border-white/5">
+                <p className="text-xs text-white/70 bg-black/40 p-3 rounded-xl border border-white/10 leading-relaxed">
                   {selectedService.description}
                 </p>
               )}
 
               {/* Date & Timezone Controls */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-white/70 mb-1">Select Date</label>
                   <input
@@ -193,7 +193,7 @@ export default function PublicBookingPage() {
                     min={toLocalDateISO()}
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full bg-slate-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--color-signal)]"
                   />
                 </div>
                 <div>
@@ -201,7 +201,7 @@ export default function PublicBookingPage() {
                   <select
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
-                    className="w-full bg-slate-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--color-signal)]"
                   >
                     {!commonTimezones.includes(timezone) && <option value={timezone}>{timezone}</option>}
                     {commonTimezones.map((tz) => (
@@ -214,12 +214,12 @@ export default function PublicBookingPage() {
               </div>
 
               {/* Slots Grid */}
-              <div>
-                <h3 className="text-sm font-bold text-white mb-2">Available Slots ({timezone})</h3>
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold text-white/80 uppercase tracking-wider">Available Slots ({timezone})</h3>
                 {loadingSlots ? (
                   <div className="py-6 text-center text-xs text-white/50"><Spinner /></div>
                 ) : slots.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-white/50 bg-white/5 rounded-xl border border-white/5">
+                  <div className="text-center py-6 text-xs text-white/50 bg-black/40 rounded-xl border border-white/10">
                     No available slots for {selectedDate}. Please select another date.
                   </div>
                 ) : (
@@ -233,7 +233,7 @@ export default function PublicBookingPage() {
                           onClick={() => setSelectedSlot(s)}
                           className={`p-2.5 rounded-lg text-xs font-bold transition-all ${
                             isSelected
-                              ? "bg-blue-500 text-white border-2 border-blue-400 shadow-md"
+                              ? "bg-[var(--color-signal)] text-white border-2 border-white shadow-md scale-[1.02]"
                               : "bg-white/5 text-white/80 border border-white/10 hover:bg-white/10"
                           }`}
                         >
@@ -247,72 +247,72 @@ export default function PublicBookingPage() {
             </div>
 
             {/* Step 2: Contact Form */}
-            <div className="space-y-6 rounded-[var(--radius-2xl)] border border-white/10 bg-[var(--color-ink)] p-5 shadow-lg sm:p-8">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3">
-                <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 text-xs flex items-center justify-center font-black">2</span>
+            <div className="space-y-5 rounded-[var(--radius-2xl)] border border-white/10 bg-white/5 p-4 shadow-lg sm:p-6 md:p-8">
+              <h2 className="text-lg font-bold text-white sm:text-xl flex items-center gap-2 border-b border-white/10 pb-3">
+                <span className="w-6 h-6 rounded-full bg-[var(--color-signal)]/20 text-[var(--color-signal)] text-xs flex items-center justify-center font-black border border-[var(--color-signal)]/30">2</span>
                 Enter Your Details
               </h2>
 
-              <form onSubmit={handleBookingSubmit} className="space-y-4">
+              <form onSubmit={handleBookingSubmit} className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-white/70 mb-1">Full Name *</label>
+                  <label className="block text-xs font-semibold text-white/80 mb-1">Full Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Alex Johnson"
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
-                    className="w-full bg-slate-900 border border-white/15 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--color-signal)]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-white/70 mb-1">Email Address *</label>
+                  <label className="block text-xs font-semibold text-white/80 mb-1">Email Address *</label>
                   <input
                     type="email"
                     required
                     placeholder="alex@example.com"
                     value={clientEmail}
                     onChange={(e) => setClientEmail(e.target.value)}
-                    className="w-full bg-slate-900 border border-white/15 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--color-signal)]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-white/70 mb-1">Phone Number *</label>
+                  <label className="block text-xs font-semibold text-white/80 mb-1">Phone Number *</label>
                   <input
                     type="tel"
                     required
                     placeholder="+1 (555) 000-0000"
                     value={clientPhone}
                     onChange={(e) => setClientPhone(e.target.value)}
-                    className="w-full bg-slate-900 border border-white/15 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--color-signal)]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-white/70 mb-1">Additional Notes (Optional)</label>
+                  <label className="block text-xs font-semibold text-white/80 mb-1">Additional Notes (Optional)</label>
                   <textarea
                     rows={3}
                     placeholder="Anything specific you'd like to discuss during the call?"
                     value={clientNotes}
                     onChange={(e) => setClientNotes(e.target.value)}
-                    className="w-full bg-slate-900 border border-white/15 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 resize-y"
+                    className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--color-signal)] resize-y"
                   />
                 </div>
 
                 {selectedSlot && (
-                  <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-xs space-y-1">
-                    <div className="font-bold text-blue-400">Selected Reservation:</div>
+                  <div className="p-3.5 rounded-xl bg-[var(--color-signal)]/15 border border-[var(--color-signal)]/40 text-xs space-y-1">
+                    <div className="font-bold text-[var(--color-signal)]">Selected Reservation:</div>
                     <div className="text-white font-semibold">{selectedSlot.display_date}</div>
-                    <div className="text-white/70">{selectedSlot.formatted_local}</div>
+                    <div className="text-white/80">{selectedSlot.formatted_local}</div>
                   </div>
                 )}
 
                 <Button
                   type="submit"
                   variant="primary"
-                  className="w-full py-3 text-base font-bold shadow-lg"
+                  className="w-full py-3.5 text-base font-bold shadow-xl"
                   disabled={submitting || !selectedSlot}
                 >
                   {submitting ? "Reserving Slot..." : "Confirm & Book Session"}

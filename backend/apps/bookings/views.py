@@ -1,4 +1,5 @@
 import datetime
+from django.conf import settings
 from rest_framework import status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -156,12 +157,25 @@ class IntakeFormView(APIView):
         responses = request.data.get('responses', {})
         form_type = 'coaching_intake' if booking.service.service_type == 'one_on_one_coaching' else 'consultation_intake'
 
+        from .services import evaluate_intake_risk_flags, send_trainer_risk_alert_email
+        has_risk_flags, risk_flags = evaluate_intake_risk_flags(responses)
+
         submission = IntakeFormSubmission.objects.create(
             booking=booking,
             form_type=form_type,
-            responses=responses
+            responses=responses,
+            has_risk_flags=has_risk_flags,
+            risk_flags=risk_flags,
         )
+
+        if has_risk_flags:
+            try:
+                send_trainer_risk_alert_email(booking, submission, risk_flags)
+            except Exception:
+                pass
+
         return Response(IntakeFormSubmissionSerializer(submission).data, status=status.HTTP_201_CREATED)
+
 
 
 class TrainerAvailabilityViewSet(viewsets.ModelViewSet):
@@ -216,3 +230,125 @@ class ClientBookingListView(APIView):
             return Response({'error': 'Only clients can access client bookings.'}, status=status.HTTP_403_FORBIDDEN)
         bookings = Booking.objects.filter(client=request.user).order_by('-start_time')
         return Response(BookingSerializer(bookings, many=True).data)
+
+
+class AssessmentReportCreateUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role != 'trainer':
+            return Response({'error': 'Only trainers can generate assessment reports.'}, status=status.HTTP_403_FORBIDDEN)
+
+        booking_id = request.data.get('booking_id')
+        if not booking_id:
+            return Response({'error': 'booking_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            booking = Booking.objects.get(id=booking_id, trainer=request.user)
+        except Booking.DoesNotExist:
+            return Response({'error': 'Booking not found or not owned by trainer.'}, status=status.HTTP_404_NOT_FOUND)
+
+        from .models import AssessmentReport
+        from .serializers import AssessmentReportSerializer
+        from .services import generate_assessment_report_pdf
+
+        report, created = AssessmentReport.objects.get_or_create(
+            booking=booking,
+            defaults={
+                'trainer': request.user,
+                'client_name': booking.client_name,
+                'client_email': booking.client_email,
+                'goals_summary': request.data.get('goals_summary', ''),
+                'baseline_assessment': request.data.get('baseline_assessment', ''),
+                'recommended_program': request.data.get('recommended_program', ''),
+                'suggested_timeline': request.data.get('suggested_timeline', ''),
+                'trainer_notes': request.data.get('trainer_notes', ''),
+            }
+        )
+
+        if not created:
+            report.goals_summary = request.data.get('goals_summary', report.goals_summary)
+            report.baseline_assessment = request.data.get('baseline_assessment', report.baseline_assessment)
+            report.recommended_program = request.data.get('recommended_program', report.recommended_program)
+            report.suggested_timeline = request.data.get('suggested_timeline', report.suggested_timeline)
+            report.trainer_notes = request.data.get('trainer_notes', report.trainer_notes)
+            report.save()
+
+        # Always generate PDF upon save
+        generate_assessment_report_pdf(report)
+
+        return Response(AssessmentReportSerializer(report).data, status=status.HTTP_200_OK if not created else status.HTTP_201_CREATED)
+
+
+class AssessmentReportReleaseView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, report_id):
+        import logging
+        logger = logging.getLogger(__name__)
+
+        if request.user.role != 'trainer':
+            return Response({'error': 'Only trainers can release reports.'}, status=status.HTTP_403_FORBIDDEN)
+
+        from .models import AssessmentReport
+        from .serializers import AssessmentReportSerializer
+        from .services import send_assessment_report_email, generate_assessment_report_pdf
+
+        try:
+            report = AssessmentReport.objects.get(id=report_id, trainer=request.user)
+        except AssessmentReport.DoesNotExist:
+            return Response({'error': 'Assessment report not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Ensure PDF file exists before attempting email
+        if not report.pdf_file:
+            try:
+                generate_assessment_report_pdf(report)
+                report.refresh_from_db()
+            except Exception as e:
+                logger.exception("Failed to generate PDF for report %s", report_id)
+                return Response({'error': f'Failed to generate PDF: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        try:
+            send_assessment_report_email(report)
+            report.refresh_from_db()
+            logger.info(
+                "Assessment report %s released and email sent to %s (backend=%s)",
+                report_id, report.client_email, settings.EMAIL_BACKEND
+            )
+        except Exception as e:
+            logger.exception("Failed to send assessment report email for report %s", report_id)
+            return Response({'error': f'Report saved but email failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(AssessmentReportSerializer(report).data, status=status.HTTP_200_OK)
+
+
+class AssessmentReportPDFDownloadView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, report_id):
+        from django.http import HttpResponse, Http404
+        from .models import AssessmentReport
+        from .services import generate_assessment_report_pdf
+
+        try:
+            report = AssessmentReport.objects.get(id=report_id)
+        except AssessmentReport.DoesNotExist:
+            raise Http404("Assessment report not found.")
+
+        token = request.query_params.get('token')
+        is_owner_trainer = request.user.is_authenticated and request.user == report.trainer
+        is_client_user = request.user.is_authenticated and report.booking.client == request.user
+        is_valid_token = token and str(report.booking.intake_token) == str(token)
+
+        if not (is_owner_trainer or is_client_user or is_valid_token):
+            return Response({'error': 'Permission denied to view this report PDF.'}, status=status.HTTP_403_FORBIDDEN)
+
+        if not report.pdf_file:
+            generate_assessment_report_pdf(report)
+
+        report.pdf_file.open('rb')
+        response = HttpResponse(report.pdf_file.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="Haqq_Assessment_Report_{report.client_name.replace(" ", "_")}.pdf"'
+        report.pdf_file.close()
+        return response
+

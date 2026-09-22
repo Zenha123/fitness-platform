@@ -466,3 +466,331 @@ def booking_id_stub(title):
     import re
     clean = re.sub(r'[^a-zA-Z0-9]', '', title)
     return f"{clean}-{datetime.datetime.now().strftime('%m%d%H%M')}"
+
+
+def evaluate_intake_risk_flags(responses):
+    """
+    Evaluates submitted intake responses against Phase 1 §5.6 PAR-Q and health risk criteria.
+    Returns (has_risk_flags: bool, risk_flags: list[str]).
+    """
+    risk_flags = []
+    if not isinstance(responses, dict):
+        return False, []
+
+    # 1. PAR-Q Questions (7 standard questions)
+    parq_questions = [
+        ('parq_heart_condition', 'PAR-Q: Doctor-diagnosed heart condition'),
+        ('parq_chest_pain_activity', 'PAR-Q: Chest pain during physical activity'),
+        ('parq_chest_pain_resting', 'PAR-Q: Chest pain at rest in past month'),
+        ('parq_dizziness_consciousness', 'PAR-Q: Loss of balance or consciousness due to dizziness'),
+        ('parq_bone_joint_problem', 'PAR-Q: Bone or joint problem aggravated by exercise'),
+        ('parq_bp_heart_meds', 'PAR-Q: Prescribed medication for blood pressure or heart condition'),
+        ('parq_other_reason', 'PAR-Q: Other medical reason preventing physical activity'),
+    ]
+
+    for key, label in parq_questions:
+        val = str(responses.get(key, '')).lower().strip()
+        if val in ['yes', 'true', '1']:
+            risk_flags.append(label)
+
+    # 2. Medical Conditions Checkbox / Selection
+    health_conditions = responses.get('health_conditions', [])
+    if isinstance(health_conditions, list):
+        risk_conditions = {'Heart Disease', 'High Blood Pressure', 'Stroke', 'Uncontrolled Diabetes', 'Asthma'}
+        for cond in health_conditions:
+            if cond in risk_conditions or any(rc.lower() in str(cond).lower() for rc in risk_conditions):
+                risk_flags.append(f"Medical History: Flagged condition ({cond})")
+
+    # 3. Current Injuries requiring medical oversight
+    if str(responses.get('has_injuries', '')).lower() in ['yes', 'true', '1']:
+        details = responses.get('injuries_details', '').strip()
+        if details:
+            risk_flags.append(f"Active Injury/Limitation: {details[:100]}")
+
+    # 4. Prescription Medications
+    if str(responses.get('takes_medications', '')).lower() in ['yes', 'true', '1']:
+        details = responses.get('medications_details', '').strip()
+        if details and any(kw in details.lower() for kw in ['heart', 'bp', 'blood pressure', 'cardio', 'beta blocker', 'insulin']):
+            risk_flags.append(f"Medication Flag: {details[:100]}")
+
+    has_flags = len(risk_flags) > 0
+    return has_flags, risk_flags
+
+
+def send_trainer_risk_alert_email(booking, submission, risk_flags):
+    """
+    Phase 1 §5.6 — Immediate trainer email alert when a client flags a PAR-Q or medical risk factor.
+    """
+    trainer_to = getattr(settings, "TRAINER_NOTIFY_EMAIL", "") or booking.trainer.email
+    from_email = formataddr(("Haqq Athlete Alerts", settings.DEFAULT_FROM_EMAIL))
+    session_when = _format_booking_local(booking.start_time, getattr(settings, "TRAINER_TIMEZONE", "Asia/Kolkata"))
+
+    formatted_flags = "\n".join([f"  • {flag}" for flag in risk_flags])
+    dashboard_url = f"{settings.FRONTEND_BASE_URL}/trainer/bookings"
+
+    subject = f"⚠️ MEDICAL RISK ALERT: Pre-Session Intake Flagged for {booking.client_name}"
+    message = f"""URGENT: Pre-Session Intake Risk Alert
+
+Client Name: {booking.client_name}
+Client Email: {booking.client_email}
+Client Phone: {booking.client_phone}
+Service: {booking.service.title}
+Session Time: {session_when}
+
+The client completed their pre-session intake form and FLAGGED 1 or more PAR-Q medical / health risk factors:
+
+{formatted_flags}
+
+ACTION REQUIRED: Please review the client's intake responses prior to your call. Medical clearance may be required before starting high-intensity physical activity.
+
+View Full Intake Form: {dashboard_url}
+
+Thank you,
+Haqq Athlete System
+"""
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=message,
+            from_email=from_email,
+            to=[trainer_to],
+        )
+        email.send(fail_silently=False)
+    except Exception:
+        logger.exception("Failed to send trainer risk alert email for booking_id=%s", booking.id)
+
+
+def generate_assessment_report_pdf(report):
+    """
+    Generates a branded PDF Goal & Assessment Report (§5.7) for a client booking.
+    Stores the resulting PDF file on `report.pdf_file`.
+    """
+    import io
+    from django.core.files.base import ContentFile
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib import colors
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=36
+    )
+
+    styles = getSampleStyleSheet()
+
+    SIGNAL_COLOR = colors.HexColor("#E8431A")
+    INK_COLOR = colors.HexColor("#0B0B0C")
+    TEXT_MUTED = colors.HexColor("#666666")
+    BG_LIGHT = colors.HexColor("#F9F9F8")
+
+    title_style = ParagraphStyle(
+        'DocTitle',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=20,
+        leading=24,
+        textColor=colors.white,
+    )
+    subtitle_style = ParagraphStyle(
+        'DocSubTitle',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=9,
+        leading=12,
+        textColor=SIGNAL_COLOR,
+    )
+    h2_style = ParagraphStyle(
+        'SectionH2',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=11,
+        leading=15,
+        textColor=SIGNAL_COLOR,
+        spaceBefore=10,
+        spaceAfter=4,
+    )
+    body_style = ParagraphStyle(
+        'BodyDark',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=9,
+        leading=13.5,
+        textColor=INK_COLOR,
+    )
+    meta_label = ParagraphStyle(
+        'MetaLabel',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=8.5,
+        leading=11,
+        textColor=TEXT_MUTED,
+    )
+    meta_val = ParagraphStyle(
+        'MetaVal',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=9,
+        leading=12,
+        textColor=INK_COLOR,
+    )
+
+    story = []
+
+    header_data = [
+        [
+            Paragraph("HAQQ ATHLETE", title_style),
+            Paragraph("GOAL & BASELINE ASSESSMENT REPORT", subtitle_style)
+        ]
+    ]
+    header_table = Table(header_data, colWidths=[270, 270])
+    header_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), INK_COLOR),
+        ('ALIGN', (0,0), (0,0), 'LEFT'),
+        ('ALIGN', (1,0), (1,0), 'RIGHT'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('TOPPADDING', (0,0), (-1,-1), 14),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 14),
+        ('LEFTPADDING', (0,0), (-1,-1), 14),
+        ('RIGHTPADDING', (0,0), (-1,-1), 14),
+    ]))
+    story.append(header_table)
+    story.append(Spacer(1, 12))
+
+    booking = report.booking
+    service_title = booking.service.title if booking and booking.service else "1-on-1 Fitness Coaching"
+    session_time = _format_booking_local(booking.start_time, getattr(settings, "TRAINER_TIMEZONE", "Asia/Kolkata")) if booking else "N/A"
+
+    meta_data = [
+        [
+            Paragraph("CLIENT NAME:", meta_label), Paragraph(report.client_name, meta_val),
+            Paragraph("DATE RELEASED:", meta_label), Paragraph(timezone.now().strftime("%B %d, %Y"), meta_val)
+        ],
+        [
+            Paragraph("CLIENT EMAIL:", meta_label), Paragraph(report.client_email, meta_val),
+            Paragraph("SERVICE TYPE:", meta_label), Paragraph(service_title, meta_val)
+        ],
+        [
+            Paragraph("SESSION TIME:", meta_label), Paragraph(session_time, meta_val),
+            Paragraph("TRAINER / COACH:", meta_label), Paragraph(report.trainer.name or "Haqq Athlete Coach", meta_val)
+        ],
+    ]
+    meta_table = Table(meta_data, colWidths=[90, 180, 90, 180])
+    meta_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), BG_LIGHT),
+        ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor("#E2E2DF")),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor("#F0F0ED")),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('LEFTPADDING', (0,0), (-1,-1), 8),
+        ('RIGHTPADDING', (0,0), (-1,-1), 8),
+    ]))
+    story.append(meta_table)
+    story.append(Spacer(1, 10))
+
+    def add_section(title_text, body_text):
+        story.append(Paragraph(title_text.upper(), h2_style))
+        story.append(HRFlowable(width="100%", thickness=1, color=SIGNAL_COLOR, spaceBefore=2, spaceAfter=6))
+        text = body_text.replace('\n', '<br/>') if body_text else "Not specified."
+        story.append(Paragraph(text, body_style))
+        story.append(Spacer(1, 8))
+
+    add_section("1. Client Goals Summary", report.goals_summary)
+    add_section("2. Current Baseline Assessment", report.baseline_assessment)
+    add_section("3. Recommended Program Direction", report.recommended_program)
+    add_section("4. Suggested Timeline & Milestones", report.suggested_timeline)
+
+    if report.trainer_notes and report.trainer_notes.strip():
+        add_section("5. Trainer Advisory Notes", report.trainer_notes)
+
+    story.append(Spacer(1, 10))
+    footer_text = Paragraph(
+        "<font color='#888888'>Confidential Assessment Report — Haqq Athlete Personal Training Platform. Prepared specifically for "
+        f"{report.client_name}. All Rights Reserved.</font>",
+        ParagraphStyle('Footer', parent=styles['Normal'], fontName='Helvetica', fontSize=7.5, leading=10, alignment=1)
+    )
+    story.append(footer_text)
+
+    doc.build(story)
+    pdf_bytes = buffer.getvalue()
+    buffer.close()
+
+    filename = f"Assessment_Report_{report.id}.pdf"
+    report.pdf_file.save(filename, ContentFile(pdf_bytes), save=True)
+    return report.pdf_file
+
+
+def send_assessment_report_email(report):
+    """
+    Phase 1 §5.7 — Emails the generated PDF Assessment Report to the client.
+    Uses Django's configured EMAIL_BACKEND (console for local dev, SMTP for production).
+    """
+    import os
+
+    # Ensure PDF file exists on disk; regenerate if missing
+    if not report.pdf_file or not report.pdf_file.name:
+        logger.info("No PDF file set on report %s, generating now...", report.id)
+        generate_assessment_report_pdf(report)
+        report.refresh_from_db()
+    else:
+        # Check that the actual file exists on disk
+        try:
+            full_path = report.pdf_file.path
+            if not os.path.exists(full_path):
+                logger.warning("PDF file missing from disk for report %s at %s, regenerating...", report.id, full_path)
+                generate_assessment_report_pdf(report)
+                report.refresh_from_db()
+        except Exception:
+            logger.warning("Could not verify PDF file path for report %s, regenerating...", report.id)
+            generate_assessment_report_pdf(report)
+            report.refresh_from_db()
+
+    from_email = formataddr(("Haqq Athlete Coaching", settings.DEFAULT_FROM_EMAIL))
+    subject = f"Your Haqq Athlete Assessment & Goal Report ({report.client_name})"
+
+    message = f"""Hi {report.client_name},
+
+Your trainer has finalized and released your personalized Haqq Athlete Goal & Assessment Report!
+
+Please find your official assessment report attached as a PDF. This report outlines your baseline assessment, recommended program direction, and suggested training timeline.
+
+If you have any questions before your session, feel free to reply directly to this email.
+
+Best regards,
+Haqq Athlete Coaching Team
+"""
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=message,
+        from_email=from_email,
+        to=[report.client_email],
+    )
+
+    # Attach the PDF
+    if report.pdf_file and report.pdf_file.name:
+        try:
+            report.pdf_file.open('rb')
+            email.attach(
+                "Haqq_Athlete_Assessment_Report.pdf",
+                report.pdf_file.read(),
+                "application/pdf"
+            )
+            report.pdf_file.close()
+        except Exception:
+            logger.exception("Failed to attach PDF file to email for report %s", report.id)
+
+    email.send(fail_silently=False)
+
+    logger.info(
+        "Assessment report email sent for report_id=%s to=%s using backend=%s",
+        report.id, report.client_email, settings.EMAIL_BACKEND
+    )
+
+    report.is_released = True
+    report.save()
+

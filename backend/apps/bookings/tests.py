@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from apps.bookings.models import BookingService, TrainerAvailability
+from apps.bookings.models import Booking, BookingService, TrainerAvailability
 from apps.bookings.services import (
     _wall_time_to_utc,
     generate_available_slots,
@@ -127,3 +127,106 @@ class GenerateAvailableSlotsTimezoneTests(TestCase):
             _ensure_start_is_bookable(
                 self.trainer, self.service, past, client_timezone="Asia/Kolkata"
             )
+
+
+class IntakeRiskEvaluationTests(TestCase):
+    def test_parq_yes_triggers_risk_flags(self):
+        from apps.bookings.services import evaluate_intake_risk_flags
+        responses = {
+            "parq_heart_condition": "yes",
+            "parq_chest_pain_activity": "no",
+            "parq_details": "Diagnosed with mild arrhythmia",
+        }
+        has_flags, flags = evaluate_intake_risk_flags(responses)
+        self.assertTrue(has_flags)
+        self.assertIn("PAR-Q: Doctor-diagnosed heart condition", flags)
+
+    def test_medical_condition_triggers_risk_flags(self):
+        from apps.bookings.services import evaluate_intake_risk_flags
+        responses = {
+            "health_conditions": ["High Blood Pressure", "Asthma"],
+        }
+        has_flags, flags = evaluate_intake_risk_flags(responses)
+        self.assertTrue(has_flags)
+        self.assertEqual(len(flags), 2)
+
+    def test_no_risks_returns_false(self):
+        from apps.bookings.services import evaluate_intake_risk_flags
+        responses = {
+            "parq_heart_condition": "no",
+            "parq_chest_pain_activity": "no",
+            "parq_chest_pain_resting": "no",
+            "parq_dizziness_consciousness": "no",
+            "parq_bone_joint_problem": "no",
+            "parq_bp_heart_meds": "no",
+            "parq_other_reason": "no",
+            "health_conditions": ["None of the above"],
+            "has_injuries": "no",
+            "takes_medications": "no",
+        }
+        has_flags, flags = evaluate_intake_risk_flags(responses)
+        self.assertFalse(has_flags)
+        self.assertEqual(len(flags), 0)
+
+
+class AssessmentReportTests(TestCase):
+
+    def setUp(self):
+        self.trainer = User.objects.create_user(
+            email="trainer-report@example.com",
+            password="password123",
+            role="trainer",
+            name="Coach Pro"
+        )
+        self.service = BookingService.objects.create(
+            trainer=self.trainer,
+            service_type=BookingService.ServiceType.ONE_ON_ONE_COACHING,
+            title="1-on-1 Fitness Coaching",
+            duration_minutes=60,
+        )
+        self.booking = Booking.objects.create(
+            service=self.service,
+            trainer=self.trainer,
+            client_name="Test Client",
+            client_email="client@example.com",
+            client_phone="+15550001111",
+            start_time=timezone.now() + datetime.timedelta(days=1),
+            end_time=timezone.now() + datetime.timedelta(days=1, hours=1),
+        )
+
+    def test_pdf_generation_creates_file(self):
+        from apps.bookings.models import AssessmentReport
+        from apps.bookings.services import generate_assessment_report_pdf
+        report = AssessmentReport.objects.create(
+            booking=self.booking,
+            trainer=self.trainer,
+            client_name=self.booking.client_name,
+            client_email=self.booking.client_email,
+            goals_summary="Fat Loss & Muscle Building",
+            baseline_assessment="Posture normal, no major joint issues.",
+            recommended_program="4-day hypertrophy split",
+            suggested_timeline="3-6 months",
+        )
+        pdf_file = generate_assessment_report_pdf(report)
+        self.assertTrue(bool(pdf_file))
+        self.assertTrue(report.pdf_file.name.endswith(".pdf"))
+
+    def test_release_report_sends_email(self):
+        from apps.bookings.models import AssessmentReport
+        from apps.bookings.services import send_assessment_report_email
+        report = AssessmentReport.objects.create(
+            booking=self.booking,
+            trainer=self.trainer,
+            client_name=self.booking.client_name,
+            client_email=self.booking.client_email,
+            goals_summary="Strength Gain",
+            baseline_assessment="Lightly active",
+            recommended_program="3-day full body split",
+            suggested_timeline="3 months",
+        )
+        send_assessment_report_email(report)
+        report.refresh_from_db()
+        self.assertTrue(report.is_released)
+        self.assertTrue(bool(report.pdf_file))
+
+

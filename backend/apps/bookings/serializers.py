@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BookingService, TrainerAvailability, TrainerBlackout, Booking, IntakeFormSubmission
+from .models import BookingService, TrainerAvailability, TrainerBlackout, Booking, IntakeFormSubmission, AssessmentReport
 from apps.accounts.serializers import UserSerializer
 
 class BookingServiceSerializer(serializers.ModelSerializer):
@@ -45,14 +45,34 @@ class TrainerBlackoutSerializer(serializers.ModelSerializer):
 class IntakeFormSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = IntakeFormSubmission
-        fields = ['id', 'booking', 'form_type', 'responses', 'submitted_at']
-        read_only_fields = ['id', 'booking', 'submitted_at']
+        fields = ['id', 'booking', 'form_type', 'responses', 'has_risk_flags', 'risk_flags', 'submitted_at']
+        read_only_fields = ['id', 'booking', 'has_risk_flags', 'risk_flags', 'submitted_at']
+
+
+class AssessmentReportSerializer(serializers.ModelSerializer):
+    pdf_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AssessmentReport
+        fields = [
+            'id', 'booking', 'trainer', 'client_name', 'client_email',
+            'goals_summary', 'baseline_assessment', 'recommended_program',
+            'suggested_timeline', 'trainer_notes', 'pdf_file', 'pdf_url',
+            'is_released', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'trainer', 'pdf_file', 'pdf_url', 'created_at', 'updated_at']
+
+    def get_pdf_url(self, obj):
+        if obj.pdf_file:
+            return f"/api/bookings/reports/{obj.id}/pdf/"
+        return None
 
 
 class BookingSerializer(serializers.ModelSerializer):
     service_details = BookingServiceSerializer(source='service', read_only=True)
     trainer_details = UserSerializer(source='trainer', read_only=True)
     intake_submission = IntakeFormSubmissionSerializer(read_only=True)
+    assessment_report = AssessmentReportSerializer(read_only=True)
 
     class Meta:
         model = Booking
@@ -60,7 +80,7 @@ class BookingSerializer(serializers.ModelSerializer):
             'id', 'service', 'service_details', 'trainer', 'trainer_details', 'client',
             'client_name', 'client_email', 'client_phone', 'start_time', 'end_time',
             'status', 'meeting_link', 'intake_token', 'client_notes', 'created_at',
-            'intake_submission'
+            'intake_submission', 'assessment_report'
         ]
         read_only_fields = ['id', 'trainer', 'intake_token', 'created_at']
 
